@@ -1,0 +1,53 @@
+- name: Install APT
+  ansible.builtin.apt:
+    name: aptitude
+    state: latest
+    update_cache: true
+
+- name: Install NTP
+  tags: ntp
+  ansible.builtin.apt:
+    name: systemd-timesyncd
+    update_cache: true
+
+- name: Configured NTP
+  tags: ntp
+  template:
+    src: timesyncd.conf.j2
+    dest: /etc/systemd/timesyncd.conf
+  notify:
+    - Restart ntp
+
+- name: running and enabled systemd-timesyncd
+  tags: ntp
+  ansible.builtin.service:
+    name: systemd-timesyncd
+    state: started
+    enabled: true
+
+- name: Install Docker
+  block:
+    - name: Install requirement
+      ansible.builtin.apt:
+        update_cache: true
+        state: latest
+        pkg:
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
+    - name: Download Docker GPG apt Key
+      ansible.builtin.get_url:
+        url: https://download.docker.com/linux/ubuntu/gpg
+        dest: ~/key
+    - name: Dearmor key
+      ansible.builtin.shell: mkdir -p /etc/apt/keyrings && gpg --dearmor --batch --yes -o /etc/apt/keyrings/docker.gpg ~/key && rm ~/key
+    - name: Add Repository
+      ansible.builtin.apt_repository:
+        repo: deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable
+        state: present
+    - name: Update apt and install docker-ce
+      ansible.builtin.apt:
+        name: docker-ce
+        state: latest
+        update_cache: true

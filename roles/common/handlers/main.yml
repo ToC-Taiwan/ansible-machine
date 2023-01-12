@@ -1,0 +1,4 @@
+- name: Restart ntp
+  service:
+    name: systemd-timesyncd
+    state: restarted
