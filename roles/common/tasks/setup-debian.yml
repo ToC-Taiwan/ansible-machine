@@ -1,8 +1,13 @@
+# code: language=ansible
 - name: Install APT
   ansible.builtin.apt:
     name: aptitude
-    state: latest
+    state: present
     update_cache: true
+
+- name: APT Upgrade
+  ansible.builtin.apt:
+    upgrade: full
 
 - name: Install NTP
   tags: ntp
@@ -12,13 +17,14 @@
 
 - name: Configured NTP
   tags: ntp
-  template:
+  ansible.builtin.template:
     src: timesyncd.conf.j2
     dest: /etc/systemd/timesyncd.conf
+    mode: 0600
   notify:
     - Restart ntp
 
-- name: running and enabled systemd-timesyncd
+- name: Running and enabled systemd-timesyncd
   tags: ntp
   ansible.builtin.service:
     name: systemd-timesyncd
@@ -30,7 +36,7 @@
     - name: Install requirement
       ansible.builtin.apt:
         update_cache: true
-        state: latest
+        state: present
         pkg:
           - ca-certificates
           - curl
@@ -40,8 +46,17 @@
       ansible.builtin.get_url:
         url: https://download.docker.com/linux/debian/gpg
         dest: ~/key
+        mode: 0600
+    - name: Create key folder
+      ansible.builtin.file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: 0755
     - name: Dearmor key
-      ansible.builtin.shell: mkdir -p /etc/apt/keyrings && gpg --dearmor --batch --yes -o /etc/apt/keyrings/docker.gpg ~/key && rm ~/key
+      ansible.builtin.shell: gpg --dearmor --batch --yes -o /etc/apt/keyrings/docker.gpg ~/key && rm ~/key
+      register: my_output
+      changed_when: my_output.rc != 0
+
     - name: Add Repository
       ansible.builtin.apt_repository:
         repo: deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable
@@ -49,5 +64,5 @@
     - name: Update apt and install docker-ce
       ansible.builtin.apt:
         name: docker-ce
-        state: latest
+        state: present
         update_cache: true
