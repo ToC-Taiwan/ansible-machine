@@ -1,0 +1,19 @@
+name: Deploy-Trader
+run-name: ${{ github.actor }} is deploying trader 🔱
+
+on:
+  workflow_dispatch:
+
+jobs:
+  Deployment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run playbook
+        uses: dawidd6/action-ansible-playbook@v2
+        with:
+          playbook: playbook.yml
+          directory: ./
+          key: ${{secrets.TIMHSU_KEY}}
+          inventory: ${{secrets.TRADER_HOSTS}}
+          options: |
+            --tags setup_trader
