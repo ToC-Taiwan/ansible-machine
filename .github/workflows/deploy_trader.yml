@@ -11,6 +11,10 @@ jobs:
       - name: checkout
         uses: actions/checkout@v3
 
+      - name: configure vars
+        run: |
+          echo "${{ secrets.TRADER_DEPLOY_VARS }}" > ./roles/setup_trader/vars/vars.yml
+
       - name: playbook
         uses: dawidd6/action-ansible-playbook@v2
         with:
