@@ -29,17 +29,17 @@ python3 -m pip install ansible
 - list
 
 ```sh
-ansible-inventory -i ./inventories/production/hosts.yml --list
+ansible-inventory -i ./inventories/hosts.yml --list
 ```
 
 - ping
 
 ```sh
-ansible virtualmachines -m ping -i ./inventories/production/hosts.yml
+ansible virtualmachines -m ping -i ./inventories/hosts.yml
 ```
 
-## Run
+## Run with tags
 
 ```sh
-ansible-playbook -i ./inventories/production/hosts.yml site.yml
+ansible-playbook -i ./inventories/hosts.yml trader.yml --tags setup_trader
 ```

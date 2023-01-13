@@ -10,13 +10,11 @@
     upgrade: full
 
 - name: Install NTP
-  tags: ntp
   ansible.builtin.apt:
     name: systemd-timesyncd
     update_cache: true
 
 - name: Configured NTP
-  tags: ntp
   ansible.builtin.template:
     src: timesyncd.conf.j2
     dest: /etc/systemd/timesyncd.conf
@@ -25,7 +23,6 @@
     - Restart ntp
 
 - name: Running and enabled systemd-timesyncd
-  tags: ntp
   ansible.builtin.service:
     name: systemd-timesyncd
     state: started
@@ -42,16 +39,19 @@
           - curl
           - gnupg
           - lsb-release
+
     - name: Download Docker GPG apt Key
       ansible.builtin.get_url:
         url: https://download.docker.com/linux/debian/gpg
         dest: ~/key
         mode: 0600
+
     - name: Create key folder
       ansible.builtin.file:
         path: /etc/apt/keyrings
         state: directory
         mode: 0755
+
     - name: Dearmor key
       ansible.builtin.shell: gpg --dearmor --batch --yes -o /etc/apt/keyrings/docker.gpg ~/key && rm ~/key
       register: my_output
@@ -61,6 +61,7 @@
       ansible.builtin.apt_repository:
         repo: deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable
         state: present
+
     - name: Update apt and install docker-ce
       ansible.builtin.apt:
         name: docker-ce

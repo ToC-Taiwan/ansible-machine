@@ -1,0 +1,7 @@
+network_name: tocvlan
+network_parent: ens224
+ip_nginx: "172.20.10.225"
+ip_node_exporter: "172.20.10.71"
+ip_rabbitmq: "172.20.10.226"
+rabbitmq_user: "admin"
+rabbitmq_password: "password"

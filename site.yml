@@ -1,3 +1,0 @@
-# code: language=ansible
-- name: Trader Basic Setup
-  import_playbook: trader_basic.yml

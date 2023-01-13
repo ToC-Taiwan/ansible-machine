@@ -1,0 +1,77 @@
+# code: language=ansible
+- name: Include variables.
+  ansible.builtin.include_vars: vars.yml
+
+- name: Create macvlan network for containers
+  community.docker.docker_network:
+    name: "{{ network_name }}"
+    state: present
+    driver: macvlan
+    driver_options: { parent: "{{ network_parent }}" }
+    ipam_config:
+      - gateway: "172.20.10.1"
+        subnet: "172.20.10.0/24"
+        iprange: "172.20.10.0/24"
+
+- name: Start node exporter
+  community.docker.docker_container:
+    name: node-exporter
+    image: quay.io/prometheus/node-exporter:latest
+    restart_policy: always
+    detach: true
+    pid_mode: host
+    volumes:
+      - /:/host:ro,rslave
+    command: --path.rootfs=/host
+    networks:
+      - name: "{{ network_name }}"
+        ipv4_address: "{{ ip_node_exporter }}"
+
+- name: Nginx
+  block:
+    - name: Create config folder
+      ansible.builtin.file:
+        path: /root/ansible-config/nginx
+        state: directory
+        mode: 0755
+
+    - name: Configure Nginx
+      ansible.builtin.template:
+        src: nginx.conf.j2
+        dest: /root/ansible-config/nginx/nginx.conf
+        mode: 0644
+
+    - name: Start Nginx
+      community.docker.docker_container:
+        name: nginx
+        image: nginx:latest
+        restart_policy: always
+        detach: true
+        volumes:
+          - /root/ansible-config/nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf:ro
+          - /root/certbot_data/www:/var/www/certbot/:ro
+          - /root/certbot_data/conf:/etc/nginx/ssl/:ro
+        networks:
+          - name: "{{ network_name }}"
+            ipv4_address: "{{ ip_nginx }}"
+
+- name: Rabbitmq
+  block:
+    - name: Start Rabbitmq
+      community.docker.docker_container:
+        name: toc-rabbitmq
+        image: rabbitmq:3.11.5-management
+        restart_policy: always
+        detach: true
+        env:
+          RABBITMQ_DEFAULT_USER: "{{ rabbitmq_user }}"
+          RABBITMQ_DEFAULT_PASS: "{{ rabbitmq_password }}"
+        networks:
+          - name: "{{ network_name }}"
+            ipv4_address: "{{ ip_rabbitmq }}"
+    - name: Check if is listening
+      ansible.builtin.wait_for:
+        port: 15672
+        delay: 5
+        host: "{{ ip_rabbitmq }}"
+        timeout: 120

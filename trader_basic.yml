@@ -1,5 +1,0 @@
-# code: language=ansible
-- name: Trader Basic Setup
-  hosts: virtualmachines
-  roles:
-    - common

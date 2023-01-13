@@ -1,0 +1,35 @@
+# code: language=ansible
+- name: Remove toc-machine-trading
+  community.docker.docker_container:
+    name: toc-machine-trading
+    state: absent
+
+- name: Remove toc-sinopac-python
+  community.docker.docker_container:
+    name: toc-sinopac-python
+    state: absent
+
+- name: Remove toc-rabbitmq
+  community.docker.docker_container:
+    name: toc-rabbitmq
+    state: absent
+
+- name: Remove node-exporter
+  community.docker.docker_container:
+    name: node-exporter
+    state: absent
+
+- name: Remove nginx
+  community.docker.docker_container:
+    name: nginx
+    state: absent
+
+- name: Prune everything (including non-dangling images)
+  community.docker.docker_prune:
+    containers: true
+    images: true
+    images_filters:
+      dangling: false
+    networks: true
+    volumes: true
+    builder_cache: true
