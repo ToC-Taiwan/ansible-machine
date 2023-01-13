@@ -3,14 +3,12 @@
   tags: basic
   hosts: all
   roles:
-    - known_host
     - basic
 
 - name: Trader Setup
   tags: setup_trader
   hosts: trader
   roles:
-    - known_host
     - reset_trader
     - setup_trader
 
@@ -18,5 +16,4 @@
   tags: reset_trader
   hosts: trader
   roles:
-    - known_host
     - reset_trader
