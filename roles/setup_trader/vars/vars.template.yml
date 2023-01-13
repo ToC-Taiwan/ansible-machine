@@ -1,0 +1,23 @@
+network_name: ""
+network_parent: ""
+
+rabbitmq_user: ""
+rabbitmq_password: ""
+
+ip_postgres: ""
+ip_node_exporter: ""
+ip_nginx: ""
+ip_rabbitmq: ""
+ip_toc_sinopac_python: ""
+ip_toc_machine_trading: ""
+
+db_user: ""
+db_password: ""
+
+sinopac_personal_id: ""
+sinopac_ca_password: ""
+sinopac_api_key: ""
+sinopac_api_key_secret: ""
+
+github_user: ""
+github_token: ""

@@ -1,0 +1,62 @@
+simulation: false
+
+history:
+    history_close_period: 65 # unit: day
+    history_tick_period: 12 # unit: day
+    history_kbar_period: 65 # unit: day
+
+quota:
+    stock_trade_quota: 1000000
+    stock_fee_discount: 0.28
+    future_trade_fee: 15
+
+target_cond:
+    real_time_rank: 20
+    black_category:
+        - 17
+    black_stock:
+        - 2317
+        - 1314
+        - 3481
+        - 2412
+        - 2002
+        - 1102
+    limit_volume: 1000
+    price_limit:
+        - low: 10
+          high: 35
+
+stock_trade_switch:
+    allow_trade: false
+    subscribe: false
+    hold_time_from_open: 45 # unit: second
+    total_open_time: 270 # unit: minute
+    trade_in_end_time: 90 # unit: minute
+    trade_in_wait_time: 45 # unit: seccond
+    trade_out_wait_time: 60 # unit: seccond
+    cancel_wait_time: 30 # unit: seccond
+
+stock_analyze:
+    max_hold_time: 60 # unit: minute
+    close_change_ratio_low: -2 # unit: %
+    close_change_ratio_high: 2 # unit: %
+    tick_analyze_period: 15000 # unit: millisecond
+    volume_pr_limit: 95 # unit: %
+    all_out_in_ratio: 75 # unit: %
+    all_in_out_ratio: 75 # unit: %
+    rsi_min_count: 150 # unit: times
+    ma_period: 60 # unit: day
+
+future_trade_switch:
+    allow_trade: false
+    subscribe: true
+    quantity: 1
+    trade_in_wait_time: 5 # unit: seccond
+    trade_out_wait_time: 10 # unit: seccond
+    cancel_wait_time: 15 # unit: seccond
+    trade_time_range:
+        first_part_duration: 780 # duration: minute 04:00:00(780/840)
+        second_part_duration: 260 # duration: minute 13:05:00(260/300)
+
+future_analyze:
+    max_hold_time: 5 # unit: minute

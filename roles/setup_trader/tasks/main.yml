@@ -2,7 +2,7 @@
 - name: Include variables.
   ansible.builtin.include_vars: vars.yml
 
-- name: Create macvlan network for containers
+- name: Create macvlan
   community.docker.docker_network:
     name: "{{ network_name }}"
     state: present
@@ -75,3 +75,63 @@
         delay: 5
         host: "{{ ip_rabbitmq }}"
         timeout: 120
+
+- name: Login Github Container Registry
+  community.docker.docker_login:
+    registry_url: ghcr.io
+    username: "{{ github_user }}"
+    password: "{{ github_token }}"
+    reauthorize: true
+
+- name: ToC Sinopac Python
+  block:
+    - name: Configure ToC Sinopac Python
+      ansible.builtin.template:
+        src: toc_sinopac_python.env.j2
+        dest: /root/toc-sinopac-python-env/.env
+        mode: 0644
+
+    - name: Start ToC Sinopac Python
+      community.docker.docker_container:
+        name: toc-sinopac-python
+        image: ghcr.io/toc-taiwan/toc-sinopac-python:latest
+        restart_policy: always
+        detach: true
+        volumes:
+          - /root/toc-sinopac-python-logs:/toc-sinopac-python/logs
+          - /root/toc-sinopac-python-env/.env:/toc-sinopac-python/.env
+        env:
+          TZ: "Asia/Taipei"
+        networks:
+          - name: "{{ network_name }}"
+            ipv4_address: "{{ ip_toc_sinopac_python }}"
+
+- name: ToC Machine Trading
+  block:
+    - name: Configure ToC Machine Trading Env
+      ansible.builtin.template:
+        src: toc_machine_trading.env.j2
+        dest: /root/toc-machine-trading-env/.env
+        mode: 0644
+
+    - name: Configure ToC Machine Trading Config
+      ansible.builtin.template:
+        src: toc_machine_trading.yml.j2
+        dest: /root/toc-machine-trading-configs/config.yml
+        mode: 0644
+
+    - name: Start ToC Machine Trading
+      community.docker.docker_container:
+        name: toc-machine-trading
+        image: ghcr.io/toc-taiwan/toc-machine-trading:latest
+        restart_policy: always
+        detach: true
+        volumes:
+          - /root/toc-machine-trading-logs:/toc-machine-trading/logs
+          - /root/toc-machine-trading-env/.env:/toc-machine-trading/.env
+          - /root/toc-machine-trading-configs/config.yml:/toc-machine-trading/configs/config.yml
+        env:
+          TZ: "Asia/Taipei"
+        networks:
+          - name: "{{ network_name }}"
+            ipv4_address: "{{ ip_toc_machine_trading }}"

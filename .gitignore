@@ -1,1 +1,3 @@
 *.retry
+vars.yml
+hosts.yml

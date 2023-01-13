@@ -1,18 +1,18 @@
 # code: language=ansible
 - name: Basic Setup
   tags: basic
-  hosts: all_vm
+  hosts: all
   roles:
     - basic
 
 - name: Trader Setup
   tags: setup_trader
-  hosts: vm_trader
+  hosts: trader
   roles:
-    - trader
+    - setup_trader
 
 - name: Reset Trader
   tags: reset_trader
-  hosts: vm_trader
+  hosts: trader
   roles:
     - reset_trader

@@ -23,7 +23,7 @@
     - Restart ntp
 
 - name: Running and enabled systemd-timesyncd
-  ansible.builtin.service:
+  ansible.builtin.systemd:
     name: systemd-timesyncd
     state: started
     enabled: true
