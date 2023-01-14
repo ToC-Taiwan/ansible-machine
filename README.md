@@ -50,3 +50,20 @@ ansible all -m ping -i inventory
   ansible.builtin.debug:
     msg: "IP: {{ remote_ip }}, Port: {{ remote_port }}"
 ```
+
+## iventory
+
+```yml
+all:
+    children:
+        toc:
+            hosts:
+                trader:
+                    ansible_host: 172.20.10.96
+                    ansible_port: 22
+                center:
+                    ansible_host: 172.20.10.99
+                    ansible_port: 22
+    vars:
+        ansible_user: root
+```
