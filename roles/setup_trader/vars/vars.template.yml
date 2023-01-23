@@ -5,6 +5,7 @@ rabbitmq_user: ""
 rabbitmq_password: ""
 
 ip_postgres: ""
+ip_loki: ""
 ip_node_exporter: ""
 ip_nginx: ""
 ip_rabbitmq: ""

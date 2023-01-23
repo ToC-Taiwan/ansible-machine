@@ -21,7 +21,7 @@ apt install -y python3-distutils
 ```
 
 ```sh
-python3 -m pip install ansible
+python3 -m pip install ansible ansible-lint
 ```
 
 ## Check hosts
@@ -66,4 +66,43 @@ all:
                     ansible_port: 22
     vars:
         ansible_user: root
+```
+
+## Debian initial
+
+- Use root
+
+```sh
+su -
+```
+
+```sh
+echo '#!/bin/bash
+apt update
+apt upgrade -y
+apt autoremove -y' > /root/update.sh && \
+chmod +x /root/update.sh
+/root/update.sh
+
+echo '#!/bin/bash
+usermod -aG sudo timhsu
+timhsukey="ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHEtmV/jvROZGXNUak4JnN0hljHUTDq8bysfTYT0eaJ6 maochindada@gmail.com"
+mkdir ~/.ssh
+echo $timhsukey > ~/.ssh/authorized_keys
+ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519 -q -N "" -C $HOSTNAME
+eval "$(ssh-agent -s)"
+ssh-add ~/.ssh/id_ed25519
+ssh-keyscan github.com > ~/.ssh/known_hosts
+sed -i "/^#PermitRootLogin/c PermitRootLogin yes" /etc/ssh/sshd_config
+cat ~/.ssh/id_ed25519.pub
+cat ~/.ssh/id_ed25519.pub >> ~/.ssh/authorized_keys
+cat ~/.ssh/id_ed25519' > ./first_init.sh && \
+chmod +x ./first_init.sh && \
+./first_init.sh && \
+rm -f ./first_init.sh
+
+echo 'allow-hotplug ens224
+iface ens224 inet dhcp' >> /etc/network/interfaces
+
+apt install -y git sudo curl
 ```

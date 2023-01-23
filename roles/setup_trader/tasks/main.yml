@@ -2,6 +2,30 @@
 - name: Include variables.
   ansible.builtin.include_vars: vars.yml
 
+- name: Loki
+  block:
+    - name: Install loki
+      community.docker.docker_plugin:
+        plugin_name: grafana/loki-docker-driver:latest
+        alias: loki
+        state: present
+
+    - name: Enable loki
+      community.docker.docker_plugin:
+        plugin_name: loki
+        state: enable
+
+    - name: Configure Docker
+      ansible.builtin.template:
+        src: loki.j2
+        dest: /etc/docker/daemon.json
+        mode: 0644
+
+    - name: Reload docker
+      ansible.builtin.systemd:
+        name: docker
+        state: restarted
+
 - name: Create macvlan
   community.docker.docker_network:
     name: "{{ network_name }}"
@@ -86,6 +110,12 @@
 
 - name: ToC Sinopac Python
   block:
+    - name: Create env folder
+      ansible.builtin.file:
+        path: /root/toc-sinopac-python-env
+        state: directory
+        mode: 0755
+
     - name: Configure ToC Sinopac Python
       ansible.builtin.template:
         src: toc_sinopac_python.env.j2
@@ -109,6 +139,18 @@
 
 - name: ToC Machine Trading
   block:
+    - name: Create env folder
+      ansible.builtin.file:
+        path: /root/toc-machine-trading-env
+        state: directory
+        mode: 0755
+
+    - name: Create config folder
+      ansible.builtin.file:
+        path: /root/toc-machine-trading-configs
+        state: directory
+        mode: 0755
+
     - name: Configure ToC Machine Trading Env
       ansible.builtin.template:
         src: toc_machine_trading.env.j2
