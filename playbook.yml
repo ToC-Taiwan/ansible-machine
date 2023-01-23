@@ -18,6 +18,12 @@
   roles:
     - reset_trader
 
+- name: Center Setup
+  tags: setup_center
+  hosts: center
+  roles:
+    - setup_center
+
 - name: Reset Center
   tags: reset_center
   hosts: center

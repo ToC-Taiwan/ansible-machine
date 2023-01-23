@@ -13,3 +13,11 @@ reset_trader: ### reset_trader
 setup_trader: ### setup_trader
 	@ansible-playbook -i inventory playbook.yml --tags setup_trader
 .PHONY: setup_trader
+
+reset_center: ### reset_center
+	@ansible-playbook -i inventory playbook.yml --tags reset_center
+.PHONY: reset_center
+
+setup_center: ### setup_center
+	@ansible-playbook -i inventory playbook.yml --tags setup_center
+.PHONY: setup_center

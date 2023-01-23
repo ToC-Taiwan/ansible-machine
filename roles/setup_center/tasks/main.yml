@@ -1,0 +1,106 @@
+# code: language=ansible
+- name: Include variables.
+  ansible.builtin.include_vars: vars.yml
+
+- name: Create macvlan
+  community.docker.docker_network:
+    name: "{{ network_name }}"
+    state: present
+    driver: macvlan
+    driver_options:
+      parent: "{{ network_parent }}"
+    ipam_config:
+      - gateway: "172.20.10.1"
+        subnet: "172.20.10.0/24"
+        iprange: "172.20.10.0/24"
+
+- name: Start Grafana
+  community.docker.docker_container:
+    name: grafana
+    image: grafana/grafana:9.3.2
+    restart_policy: always
+    detach: true
+    networks:
+      - name: "{{ network_name }}"
+        ipv4_address: "{{ ip_grafana }}"
+
+- name: Loki
+  block:
+    - name: Create config folder
+      ansible.builtin.file:
+        path: /root/loki-config
+        state: directory
+        mode: 0755
+
+    - name: Configure Loki
+      ansible.builtin.template:
+        src: loki.j2
+        dest: /root/loki-config/loki.yaml
+        mode: 0644
+
+    - name: Start Loki
+      community.docker.docker_container:
+        name: loki
+        image: grafana/loki:2.7.1
+        restart_policy: always
+        detach: true
+        volumes:
+          - /root/loki-config/loki.yaml:/etc/loki/local-config.yaml:ro
+        networks:
+          - name: "{{ network_name }}"
+            ipv4_address: "{{ ip_loki }}"
+
+- name: Prometheus
+  block:
+    - name: Create config folder
+      ansible.builtin.file:
+        path: /root/prometheus-config
+        state: directory
+        mode: 0755
+
+    - name: Configure Prometheus
+      ansible.builtin.template:
+        src: prometheus.j2
+        dest: /root/prometheus-config/prometheus.yml
+        mode: 0644
+
+    - name: Start Prometheus
+      community.docker.docker_container:
+        name: prometheus
+        image: prom/prometheus:v2.40.7
+        restart_policy: always
+        detach: true
+        volumes:
+          - /root/prometheus-config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+        networks:
+          - name: "{{ network_name }}"
+            ipv4_address: "{{ ip_prometheus }}"
+
+- name: Postgres
+  block:
+    - name: Delete data folder
+      ansible.builtin.file:
+        path: /data/database/postgres
+        state: absent
+
+    - name: Create data folder
+      ansible.builtin.file:
+        path: /data/database/postgres
+        state: directory
+        mode: 0755
+
+    - name: Start Postgres
+      community.docker.docker_container:
+        name: postgres
+        image: postgres:15.1
+        restart_policy: always
+        detach: true
+        env:
+          POSTGRES_DB: "{{ default_db }}"
+          POSTGRES_USER: "{{ db_user }}"
+          POSTGRES_PASSWORD: "{{ db_password }}"
+        volumes:
+          - /data/database/postgres:/var/lib/postgresql/data
+        networks:
+          - name: "{{ network_name }}"
+            ipv4_address: "{{ ip_postgres }}"
