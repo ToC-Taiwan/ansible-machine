@@ -21,3 +21,6 @@ reset_center: ### reset_center
 setup_center: ### setup_center
 	@ansible-playbook -i inventory playbook.yml --tags setup_center
 .PHONY: setup_center
+
+install: ### install
+	@python3 -m pip install ansible ansible-lint
