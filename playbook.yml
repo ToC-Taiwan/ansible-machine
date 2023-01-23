@@ -17,3 +17,9 @@
   hosts: trader
   roles:
     - reset_trader
+
+- name: Reset Center
+  tags: reset_center
+  hosts: center
+  roles:
+    - reset_center
