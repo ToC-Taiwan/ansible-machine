@@ -9,6 +9,11 @@
     name: toc-sinopac-python
     state: absent
 
+- name: Remove toc-fugle-python
+  community.docker.docker_container:
+    name: toc-fugle-python
+    state: absent
+
 - name: Remove toc-rabbitmq
   community.docker.docker_container:
     name: toc-rabbitmq
