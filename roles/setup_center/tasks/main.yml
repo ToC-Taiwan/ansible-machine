@@ -14,16 +14,6 @@
         subnet: "172.20.10.0/24"
         iprange: "172.20.10.0/24"
 
-- name: Start Grafana
-  community.docker.docker_container:
-    name: grafana
-    image: grafana/grafana:9.3.2
-    restart_policy: always
-    detach: true
-    networks:
-      - name: "{{ network_name }}"
-        ipv4_address: "{{ ip_grafana }}"
-
 - name: Loki
   block:
     - name: Create config folder
@@ -50,6 +40,13 @@
           - name: "{{ network_name }}"
             ipv4_address: "{{ ip_loki }}"
 
+    - name: Check if is listening
+      ansible.builtin.wait_for:
+        port: 3100
+        delay: 5
+        host: "{{ ip_loki }}"
+        timeout: 120
+
 - name: Prometheus
   block:
     - name: Create config folder
@@ -75,6 +72,62 @@
         networks:
           - name: "{{ network_name }}"
             ipv4_address: "{{ ip_prometheus }}"
+
+    - name: Check if is listening
+      ansible.builtin.wait_for:
+        port: 9090
+        delay: 5
+        host: "{{ ip_prometheus }}"
+        timeout: 120
+
+- name: Grafana
+  block:
+    - name: Start Grafana
+      community.docker.docker_container:
+        name: grafana
+        image: grafana/grafana:9.3.2
+        restart_policy: always
+        detach: true
+        networks:
+          - name: "{{ network_name }}"
+            ipv4_address: "{{ ip_grafana }}"
+
+    - name: Install Clock
+      community.docker.docker_container_exec:
+        container: grafana
+        command: grafana-cli plugins install grafana-clock-panel
+
+    - name: Restart Grafana
+      community.docker.docker_container:
+        name: grafana
+        restart: true
+
+    - name: Check if is listening
+      ansible.builtin.wait_for:
+        port: 3000
+        delay: 5
+        host: "{{ ip_grafana }}"
+        timeout: 120
+
+    - name: Install prometheus datasource
+      community.grafana.grafana_datasource:
+        name: Prometheus
+        grafana_url: http://{{ ip_grafana }}:3000
+        grafana_user: admin
+        grafana_password: admin
+        ds_type: prometheus
+        ds_url: http://{{ ip_prometheus }}:9090
+        tls_skip_verify: true
+
+    - name: Install loki datasource
+      community.grafana.grafana_datasource:
+        name: Loki
+        grafana_url: http://{{ ip_grafana }}:3000
+        grafana_user: admin
+        grafana_password: admin
+        ds_type: loki
+        ds_url: http://{{ ip_loki }}:3100
+        tls_skip_verify: true
 
 - name: Postgres
   block:

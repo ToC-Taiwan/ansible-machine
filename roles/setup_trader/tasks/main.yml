@@ -137,6 +137,35 @@
           - name: "{{ network_name }}"
             ipv4_address: "{{ ip_toc_sinopac_python }}"
 
+- name: ToC Fugle Python
+  block:
+    - name: Create env folder
+      ansible.builtin.file:
+        path: /root/toc-fugle-python-env
+        state: directory
+        mode: 0755
+
+    - name: Configure ToC Fugle Python
+      ansible.builtin.template:
+        src: toc_fugle_python.env.j2
+        dest: /root/toc-fugle-python-env/.env
+        mode: 0644
+
+    - name: Start ToC Fugle Python
+      community.docker.docker_container:
+        name: toc-fugle-python
+        image: ghcr.io/toc-taiwan/toc-fugle-python:latest
+        restart_policy: always
+        detach: true
+        volumes:
+          - /root/toc-fugle-python-logs:/toc-fugle-python/logs
+          - /root/toc-fugle-python-env/.env:/toc-fugle-python/.env
+        env:
+          TZ: "Asia/Taipei"
+        networks:
+          - name: "{{ network_name }}"
+            ipv4_address: "{{ ip_toc_fugle_python }}"
+
 - name: ToC Machine Trading
   block:
     - name: Create env folder

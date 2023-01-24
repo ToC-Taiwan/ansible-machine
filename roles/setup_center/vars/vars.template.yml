@@ -9,6 +9,7 @@ ip_node_exporter: ""
 ip_rabbitmq: ""
 ip_toc_sinopac_python: ""
 ip_toc_machine_trading: ""
+ip_toc_fugle_python: ""
 
 default_db: ""
 db_user: ""

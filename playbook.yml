@@ -22,6 +22,7 @@
   tags: setup_center
   hosts: center
   roles:
+    - reset_center
     - setup_center
 
 - name: Reset Center

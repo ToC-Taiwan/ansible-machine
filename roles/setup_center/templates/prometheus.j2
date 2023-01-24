@@ -18,3 +18,7 @@ scrape_configs:
     - job_name: "toc-machine-trading"
       static_configs:
           - targets: ["{{ ip_toc_machine_trading }}:26670"]
+
+    - job_name: "toc-fugle-python"
+      static_configs:
+          - targets: ["{{ ip_toc_sinopac_python }}:8887"]
