@@ -1,5 +1,7 @@
 # ANSIBLE MACHINE
 
+[![Deploy-Trader](https://github.com/ToC-Taiwan/ansible-machine/actions/workflows/deploy_trader.yml/badge.svg)](https://github.com/ToC-Taiwan/ansible-machine/actions/workflows/deploy_trader.yml)
+
 ## Install Ansible
 
 ```sh
