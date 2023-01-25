@@ -9,18 +9,15 @@
         plugin_name: grafana/loki-docker-driver:latest
         alias: loki
         state: present
-
     - name: Enable loki
       community.docker.docker_plugin:
         plugin_name: loki
         state: enable
-
     - name: Configure Docker
       ansible.builtin.template:
         src: loki.j2
         dest: /etc/docker/daemon.json
         mode: 0644
-
     - name: Reload docker
       ansible.builtin.systemd:
         name: docker
@@ -59,13 +56,11 @@
         path: /root/ansible-config/nginx
         state: directory
         mode: 0755
-
     - name: Configure Nginx
       ansible.builtin.template:
         src: nginx.conf.j2
         dest: /root/ansible-config/nginx/nginx.conf
         mode: 0644
-
     - name: Start Nginx
       community.docker.docker_container:
         name: nginx
@@ -115,13 +110,11 @@
         path: /root/toc-sinopac-python-env
         state: directory
         mode: 0755
-
     - name: Configure ToC Sinopac Python
       ansible.builtin.template:
         src: toc_sinopac_python.env.j2
         dest: /root/toc-sinopac-python-env/.env
         mode: 0644
-
     - name: Start ToC Sinopac Python
       community.docker.docker_container:
         name: toc-sinopac-python
@@ -144,13 +137,11 @@
         path: /root/toc-fugle-python-env
         state: directory
         mode: 0755
-
     - name: Configure ToC Fugle Python
       ansible.builtin.template:
         src: toc_fugle_python.env.j2
         dest: /root/toc-fugle-python-env/.env
         mode: 0644
-
     - name: Start ToC Fugle Python
       community.docker.docker_container:
         name: toc-fugle-python
@@ -173,19 +164,16 @@
         path: /root/toc-machine-trading-env
         state: directory
         mode: 0755
-
     - name: Create config folder
       ansible.builtin.file:
         path: /root/toc-machine-trading-configs
         state: directory
         mode: 0755
-
     - name: Configure ToC Machine Trading Env
       ansible.builtin.template:
         src: toc_machine_trading.env.j2
         dest: /root/toc-machine-trading-env/.env
         mode: 0644
-
     - name: Configure ToC Machine Trading Config
       ansible.builtin.template:
         src: toc_machine_trading.yml.j2
