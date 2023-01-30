@@ -5,7 +5,7 @@
   roles:
     - basic
 
-- name: Trader Setup
+- name: Setup Trader
   tags: setup_trader
   hosts: trader
   roles:
@@ -17,6 +17,12 @@
   hosts: trader
   roles:
     - reset_trader
+
+- name: Reset DB
+  tags: reset_db
+  hosts: center
+  roles:
+    - reset_db
 
 - name: Center Setup
   tags: setup_center

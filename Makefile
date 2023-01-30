@@ -18,6 +18,10 @@ reset_center: ### reset_center
 	@ansible-playbook -i inventory playbook.yml --tags reset_center
 .PHONY: reset_center
 
+reset_db: ### reset_db
+	@ansible-playbook -i inventory playbook.yml --tags reset_db
+.PHONY: reset_db
+
 setup_center: ### setup_center
 	@ansible-playbook -i inventory playbook.yml --tags setup_center
 .PHONY: setup_center

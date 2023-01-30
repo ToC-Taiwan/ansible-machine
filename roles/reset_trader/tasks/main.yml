@@ -1,4 +1,9 @@
 # code: language=ansible
+- name: Remove toc-rabbitmq
+  community.docker.docker_container:
+    name: toc-rabbitmq
+    state: absent
+
 - name: Remove toc-machine-trading
   community.docker.docker_container:
     name: toc-machine-trading
@@ -12,11 +17,6 @@
 - name: Remove toc-fugle-python
   community.docker.docker_container:
     name: toc-fugle-python
-    state: absent
-
-- name: Remove toc-rabbitmq
-  community.docker.docker_container:
-    name: toc-rabbitmq
     state: absent
 
 - name: Remove node-exporter
