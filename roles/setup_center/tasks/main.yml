@@ -1,7 +1,4 @@
 # code: language=ansible
-- name: Include variables.
-  ansible.builtin.include_vars: vars.yml
-
 - name: Create macvlan
   community.docker.docker_network:
     name: "{{ network_name }}"

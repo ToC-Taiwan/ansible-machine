@@ -5,14 +5,17 @@ rabbitmq_user: ""
 rabbitmq_password: ""
 
 ip_postgres: ""
-ip_loki: ""
 ip_node_exporter: ""
+ip_grafana: ""
+ip_loki: ""
+ip_prometheus: ""
 ip_nginx: ""
 ip_rabbitmq: ""
 ip_toc_sinopac_python: ""
 ip_toc_machine_trading: ""
 ip_toc_fugle_python: ""
 
+default_db: ""
 db_user: ""
 db_password: ""
 

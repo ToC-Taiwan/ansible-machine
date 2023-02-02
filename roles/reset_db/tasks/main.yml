@@ -1,7 +1,4 @@
 # code: language=ansible
-- name: Include variables.
-  ansible.builtin.include_vars: vars.yml
-
 - name: Remove postgres
   community.docker.docker_container:
     name: postgres

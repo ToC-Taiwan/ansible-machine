@@ -1,6 +1,0 @@
-network_name: ""
-ip_postgres: ""
-
-default_db: ""
-db_user: ""
-db_password: ""

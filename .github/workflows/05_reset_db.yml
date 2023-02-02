@@ -1,5 +1,5 @@
-name: Deploy-Trader
-run-name: ${{ github.actor }} is deploying trader 🔱
+name: Reset-DB
+run-name: ${{ github.actor }} is reset database 🔱
 
 on:
   workflow_dispatch:
@@ -18,7 +18,7 @@ jobs:
 
       - name: configure vars
         run: |
-          echo "${{ secrets.TRADER_DEPLOY_VARS }}" > ./roles/setup_trader/vars/vars.yml
+          echo "${{ secrets.TRADER_DEPLOY_VARS }}" > ./group_vars/vars.yml
 
       - name: playbook
         uses: dawidd6/action-ansible-playbook@v2
@@ -28,4 +28,4 @@ jobs:
           key: ${{ secrets.TIMHSU_KEY }}
           inventory: ${{ secrets.TRADER_HOSTS }}
           options: |
-            --tags setup_trader
+            --tags reset_db
