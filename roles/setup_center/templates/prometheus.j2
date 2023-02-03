@@ -13,7 +13,7 @@ scrape_configs:
 
     - job_name: "toc-sinopac-python"
       static_configs:
-          - targets: ["{{ ip_toc_sinopac_python }}:8887"]
+          - targets: ["{{ ip_toc_sinopac_python }}:6666"]
 
     - job_name: "toc-machine-trading"
       static_configs:
@@ -21,4 +21,4 @@ scrape_configs:
 
     - job_name: "toc-fugle-python"
       static_configs:
-          - targets: ["{{ ip_toc_fugle_python }}:8887"]
+          - targets: ["{{ ip_toc_fugle_python }}:8888"]
