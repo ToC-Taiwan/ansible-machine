@@ -52,7 +52,7 @@ ansible all -m ping -i inventory
     msg: "IP: {{ remote_ip }}, Port: {{ remote_port }}"
 ```
 
-## iventory
+## inventory
 
 ```yml
 all:
