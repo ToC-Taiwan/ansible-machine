@@ -2,6 +2,7 @@
 
 [![Actions](https://github.com/ToC-Taiwan/ansible-machine/actions/workflows/actions.yml/badge.svg)](https://github.com/ToC-Taiwan/ansible-machine/actions/workflows/actions.yml)
 [![Ansible](https://img.shields.io/badge/Ansible-2.14.2-red?logo=ansible&logoColor=red)](https://www.ansible.com)
+[![Python](https://img.shields.io/badge/Python-3.10.9-yellow?logo=python&logoColor=yellow)](https://python.org)
 
 ## Install Ansible
 
