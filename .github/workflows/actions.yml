@@ -6,6 +6,14 @@ on:
     inputs:
       action:
         description: "Action"
+        type: "choice"
+        options:
+          - "basic"
+          - "reset_center"
+          - "setup_center"
+          - "reset_trader"
+          - "setup_trader"
+          - "reset_db"
         required: true
         default: ""
 
