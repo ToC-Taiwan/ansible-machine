@@ -1,4 +1,4 @@
-simulation: false
+simulation: {{ mt_config.simulation }}
 
 history:
     # unit: day
@@ -48,37 +48,37 @@ analyze_stock:
     ma_period: 60
 
 trade_stock:
-    allow_trade: false
-    subscribe: true
+    allow_trade: {{ mt_config.trade_stock.allow_trade }}
+    subscribe: {{ mt_config.trade_stock.subscribe }}
 
     # unit: second
-    hold_time_from_open: 45
-    trade_in_wait_time: 45
-    trade_out_wait_time: 60
-    cancel_wait_time: 30
+    hold_time_from_open: {{ mt_config.trade_stock.hold_time_from_open }}
+    trade_in_wait_time: {{ mt_config.trade_stock.trade_in_wait_time }}
+    trade_out_wait_time: {{ mt_config.trade_stock.trade_out_wait_time }}
+    cancel_wait_time: {{ mt_config.trade_stock.cancel_wait_time }}
 
     # unit: minute
-    total_open_time: 270
-    trade_in_end_time: 90
+    total_open_time: {{ mt_config.trade_stock.total_open_time }}
+    trade_in_end_time: {{ mt_config.trade_stock.trade_in_end_time }}
 
 trade_future:
-    allow_trade: true
-    subscribe: true
-    quantity: 1
-    target_balance_high: 2
-    target_balance_low: -3
-    trade_out_wait_times: 5
+    allow_trade: {{ mt_config.trade_future.allow_trade }}
+    subscribe: {{ mt_config.trade_future.subscribe }}
+    quantity: {{ mt_config.trade_future.quantity }}
+    target_balance_high: {{ mt_config.trade_future.target_balance_high }}
+    target_balance_low: {{ mt_config.trade_future.target_balance_low }}
+    trade_out_wait_times: {{ mt_config.trade_future.trade_out_wait_times }}
 
     # unit: seccond
-    buy_sell_wait_time: 7
-    cancel_wait_time: 15
-    tick_interval: 10
+    buy_sell_wait_time: {{ mt_config.trade_future.buy_sell_wait_time }}
+    cancel_wait_time: {{ mt_config.trade_future.cancel_wait_time }}
+    tick_interval: {{ mt_config.trade_future.tick_interval }}
 
     # duration: minute
     trade_time_range:
-        first_part_duration: 780
-        second_part_duration: 285
-    max_hold_time: 30
+        first_part_duration: {{ mt_config.trade_future.trade_time_range.first_part_duration }}
+        second_part_duration: {{ mt_config.trade_future.trade_time_range.second_part_duration }}
+    max_hold_time: {{ mt_config.trade_future.max_hold_time }}
 
-    out_in_ratio: 65
-    in_out_ratio: 15
+    out_in_ratio: {{ mt_config.trade_future.out_in_ratio }}
+    in_out_ratio: {{ mt_config.trade_future.in_out_ratio }}
