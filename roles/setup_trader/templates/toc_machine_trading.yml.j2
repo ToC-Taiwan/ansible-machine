@@ -80,5 +80,8 @@ trade_future:
         second_part_duration: {{ mt_config.trade_future.trade_time_range.second_part_duration }}
     max_hold_time: {{ mt_config.trade_future.max_hold_time }}
 
+    # unit: %
+    rate_limit: {{ mt_config.trade_future.rate_limit }}
+    rate_change_ratio: {{ mt_config.trade_future.rate_change_ratio }}
     out_in_ratio: {{ mt_config.trade_future.out_in_ratio }}
     in_out_ratio: {{ mt_config.trade_future.in_out_ratio }}
