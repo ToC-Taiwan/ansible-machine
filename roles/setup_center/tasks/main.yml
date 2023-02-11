@@ -85,6 +85,8 @@
         image: grafana/grafana:9.3.2
         restart_policy: always
         detach: true
+        env:
+          TZ: "Asia/Taipei"
         networks:
           - name: "{{ network_name }}"
             ipv4_address: "{{ ip_grafana }}"
@@ -149,6 +151,7 @@
           POSTGRES_DB: "{{ default_db }}"
           POSTGRES_USER: "{{ db_user }}"
           POSTGRES_PASSWORD: "{{ db_password }}"
+          TZ: "Asia/Taipei"
         volumes:
           - /data/database/postgres:/var/lib/postgresql/data
         networks:
