@@ -27,4 +27,4 @@ setup_center: ### setup_center
 .PHONY: setup_center
 
 install: ### install
-	@python3 -m pip install ansible ansible-lint
+	@python3 -m pip install ansible ansible-lint jmespath
