@@ -2,66 +2,66 @@ name: Actions
 run-name: ${{ github.actor }} is playing books 🔱
 
 on:
-  workflow_dispatch:
-    inputs:
-      action:
-        description: "Action"
-        type: "choice"
-        options:
-          - "basic"
-          - "reset_center"
-          - "setup_center"
-          - "reset_trader"
-          - "setup_trader"
-          - "reset_db"
-        required: true
-        default: ""
+    workflow_dispatch:
+        inputs:
+            action:
+                description: "Action"
+                type: "choice"
+                options:
+                    - "basic"
+                    - "reset_center"
+                    - "setup_center"
+                    - "reset_trader"
+                    - "setup_trader"
+                    - "reset_db"
+                required: true
+                default: ""
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+    group: ${{ github.workflow }}-${{ github.ref }}
+    cancel-in-progress: true
 
 jobs:
-  Deployment:
-    runs-on: ubuntu-latest
-    steps:
-      - name: checkout
-        uses: actions/checkout@v3
+    Deployment:
+        runs-on: ubuntu-latest
+        steps:
+            - name: checkout
+              uses: actions/checkout@v3
 
-      - name: play basic
-        if: "${{ github.event.inputs.action == 'basic' }}"
-        run: echo "ACTION_TO_RUN=basic" >> ${GITHUB_ENV}
+            - name: play basic
+              if: "${{ github.event.inputs.action == 'basic' }}"
+              run: echo "ACTION_TO_RUN=basic" >> ${GITHUB_ENV}
 
-      - name: play reset_center
-        if: "${{ github.event.inputs.action == 'reset_center' }}"
-        run: echo "ACTION_TO_RUN=reset_center" >> ${GITHUB_ENV}
+            - name: play reset_center
+              if: "${{ github.event.inputs.action == 'reset_center' }}"
+              run: echo "ACTION_TO_RUN=reset_center" >> ${GITHUB_ENV}
 
-      - name: play setup_center
-        if: "${{ github.event.inputs.action == 'setup_center' }}"
-        run: echo "ACTION_TO_RUN=setup_center" >> ${GITHUB_ENV}
+            - name: play setup_center
+              if: "${{ github.event.inputs.action == 'setup_center' }}"
+              run: echo "ACTION_TO_RUN=setup_center" >> ${GITHUB_ENV}
 
-      - name: play reset_trader
-        if: "${{ github.event.inputs.action == 'reset_trader' }}"
-        run: echo "ACTION_TO_RUN=reset_trader" >> ${GITHUB_ENV}
+            - name: play reset_trader
+              if: "${{ github.event.inputs.action == 'reset_trader' }}"
+              run: echo "ACTION_TO_RUN=reset_trader" >> ${GITHUB_ENV}
 
-      - name: play setup_trader
-        if: "${{ github.event.inputs.action == 'setup_trader' }}"
-        run: echo "ACTION_TO_RUN=setup_trader" >> ${GITHUB_ENV}
+            - name: play setup_trader
+              if: "${{ github.event.inputs.action == 'setup_trader' }}"
+              run: echo "ACTION_TO_RUN=setup_trader" >> ${GITHUB_ENV}
 
-      - name: play reset_db
-        if: "${{ github.event.inputs.action == 'reset_db' }}"
-        run: echo "ACTION_TO_RUN=reset_db" >> ${GITHUB_ENV}
+            - name: play reset_db
+              if: "${{ github.event.inputs.action == 'reset_db' }}"
+              run: echo "ACTION_TO_RUN=reset_db" >> ${GITHUB_ENV}
 
-      - name: configure vars
-        run: |
-          echo "${{ secrets.TRADER_DEPLOY_VARS }}" > ./group_vars/vars.yml
+            - name: configure vars
+              run: |
+                  echo "${{ secrets.TRADER_DEPLOY_VARS }}" > ./group_vars/vars.yml
 
-      - name: playbook
-        uses: dawidd6/action-ansible-playbook@v2
-        with:
-          playbook: playbook.yml
-          directory: ./
-          key: ${{ secrets.TIMHSU_KEY }}
-          inventory: ${{ secrets.TRADER_HOSTS }}
-          options: |
-            --tags ${{ env.ACTION_TO_RUN }}
+            - name: playbook
+              uses: dawidd6/action-ansible-playbook@v2
+              with:
+                  playbook: playbook.yml
+                  directory: ./
+                  key: ${{ secrets.TIMHSU_KEY }}
+                  inventory: ${{ secrets.TRADER_HOSTS }}
+                  options: |
+                      --tags ${{ env.ACTION_TO_RUN }}

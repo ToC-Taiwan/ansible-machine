@@ -1,159 +1,159 @@
 # code: language=ansible
 - name: Create macvlan
   community.docker.docker_network:
-    name: "{{ network_name }}"
-    state: present
-    driver: macvlan
-    driver_options:
-      parent: "{{ network_parent }}"
-    ipam_config:
-      - gateway: "172.20.10.1"
-        subnet: "172.20.10.0/24"
-        iprange: "172.20.10.0/24"
+      name: "{{ network_name }}"
+      state: present
+      driver: macvlan
+      driver_options:
+          parent: "{{ network_parent }}"
+      ipam_config:
+          - gateway: "172.20.10.1"
+            subnet: "172.20.10.0/24"
+            iprange: "172.20.10.0/24"
 
 - name: Loki
   block:
-    - name: Create config folder
-      ansible.builtin.file:
-        path: /root/loki-config
-        state: directory
-        mode: 0755
+      - name: Create config folder
+        ansible.builtin.file:
+            path: /root/loki-config
+            state: directory
+            mode: 0755
 
-    - name: Configure Loki
-      ansible.builtin.template:
-        src: loki.j2
-        dest: /root/loki-config/loki.yaml
-        mode: 0644
+      - name: Configure Loki
+        ansible.builtin.template:
+            src: loki.j2
+            dest: /root/loki-config/loki.yaml
+            mode: 0644
 
-    - name: Start Loki
-      community.docker.docker_container:
-        name: loki
-        image: grafana/loki:2.7.1
-        restart_policy: always
-        detach: true
-        volumes:
-          - /root/loki-config/loki.yaml:/etc/loki/local-config.yaml:ro
-        networks:
-          - name: "{{ network_name }}"
-            ipv4_address: "{{ ip_loki }}"
+      - name: Start Loki
+        community.docker.docker_container:
+            name: loki
+            image: grafana/loki:2.7.1
+            restart_policy: always
+            detach: true
+            volumes:
+                - /root/loki-config/loki.yaml:/etc/loki/local-config.yaml:ro
+            networks:
+                - name: "{{ network_name }}"
+                  ipv4_address: "{{ ip_loki }}"
 
-    - name: Check if is listening
-      ansible.builtin.wait_for:
-        port: 3100
-        delay: 5
-        host: "{{ ip_loki }}"
-        timeout: 120
+      - name: Check if is listening
+        ansible.builtin.wait_for:
+            port: 3100
+            delay: 5
+            host: "{{ ip_loki }}"
+            timeout: 120
 
 - name: Prometheus
   block:
-    - name: Create config folder
-      ansible.builtin.file:
-        path: /root/prometheus-config
-        state: directory
-        mode: 0755
+      - name: Create config folder
+        ansible.builtin.file:
+            path: /root/prometheus-config
+            state: directory
+            mode: 0755
 
-    - name: Configure Prometheus
-      ansible.builtin.template:
-        src: prometheus.j2
-        dest: /root/prometheus-config/prometheus.yml
-        mode: 0644
+      - name: Configure Prometheus
+        ansible.builtin.template:
+            src: prometheus.j2
+            dest: /root/prometheus-config/prometheus.yml
+            mode: 0644
 
-    - name: Start Prometheus
-      community.docker.docker_container:
-        name: prometheus
-        image: prom/prometheus:v2.40.7
-        restart_policy: always
-        detach: true
-        volumes:
-          - /root/prometheus-config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-        networks:
-          - name: "{{ network_name }}"
-            ipv4_address: "{{ ip_prometheus }}"
+      - name: Start Prometheus
+        community.docker.docker_container:
+            name: prometheus
+            image: prom/prometheus:v2.40.7
+            restart_policy: always
+            detach: true
+            volumes:
+                - /root/prometheus-config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+            networks:
+                - name: "{{ network_name }}"
+                  ipv4_address: "{{ ip_prometheus }}"
 
-    - name: Check if is listening
-      ansible.builtin.wait_for:
-        port: 9090
-        delay: 5
-        host: "{{ ip_prometheus }}"
-        timeout: 120
+      - name: Check if is listening
+        ansible.builtin.wait_for:
+            port: 9090
+            delay: 5
+            host: "{{ ip_prometheus }}"
+            timeout: 120
 
 - name: Grafana
   block:
-    - name: Start Grafana
-      community.docker.docker_container:
-        name: grafana
-        image: grafana/grafana:9.3.2
-        restart_policy: always
-        detach: true
-        env:
-          TZ: "Asia/Taipei"
-        networks:
-          - name: "{{ network_name }}"
-            ipv4_address: "{{ ip_grafana }}"
+      - name: Start Grafana
+        community.docker.docker_container:
+            name: grafana
+            image: grafana/grafana:9.3.2
+            restart_policy: always
+            detach: true
+            env:
+                TZ: "Asia/Taipei"
+            networks:
+                - name: "{{ network_name }}"
+                  ipv4_address: "{{ ip_grafana }}"
 
-    - name: Install Clock
-      community.docker.docker_container_exec:
-        container: grafana
-        command: grafana-cli plugins install grafana-clock-panel
+      - name: Install Clock
+        community.docker.docker_container_exec:
+            container: grafana
+            command: grafana-cli plugins install grafana-clock-panel
 
-    - name: Restart Grafana
-      community.docker.docker_container:
-        name: grafana
-        restart: true
+      - name: Restart Grafana
+        community.docker.docker_container:
+            name: grafana
+            restart: true
 
-    - name: Check if is listening
-      ansible.builtin.wait_for:
-        port: 3000
-        delay: 5
-        host: "{{ ip_grafana }}"
-        timeout: 120
+      - name: Check if is listening
+        ansible.builtin.wait_for:
+            port: 3000
+            delay: 5
+            host: "{{ ip_grafana }}"
+            timeout: 120
 
-    - name: Install prometheus datasource
-      community.grafana.grafana_datasource:
-        name: Prometheus
-        grafana_url: http://{{ ip_grafana }}:3000
-        grafana_user: admin
-        grafana_password: admin
-        ds_type: prometheus
-        ds_url: http://{{ ip_prometheus }}:9090
-        tls_skip_verify: true
+      - name: Install prometheus datasource
+        community.grafana.grafana_datasource:
+            name: Prometheus
+            grafana_url: http://{{ ip_grafana }}:3000
+            grafana_user: admin
+            grafana_password: admin
+            ds_type: prometheus
+            ds_url: http://{{ ip_prometheus }}:9090
+            tls_skip_verify: true
 
-    - name: Install loki datasource
-      community.grafana.grafana_datasource:
-        name: Loki
-        grafana_url: http://{{ ip_grafana }}:3000
-        grafana_user: admin
-        grafana_password: admin
-        ds_type: loki
-        ds_url: http://{{ ip_loki }}:3100
-        tls_skip_verify: true
+      - name: Install loki datasource
+        community.grafana.grafana_datasource:
+            name: Loki
+            grafana_url: http://{{ ip_grafana }}:3000
+            grafana_user: admin
+            grafana_password: admin
+            ds_type: loki
+            ds_url: http://{{ ip_loki }}:3100
+            tls_skip_verify: true
 
 - name: Postgres
   block:
-    - name: Delete data folder
-      ansible.builtin.file:
-        path: /data/database/postgres
-        state: absent
+      - name: Delete data folder
+        ansible.builtin.file:
+            path: /data/database/postgres
+            state: absent
 
-    - name: Create data folder
-      ansible.builtin.file:
-        path: /data/database/postgres
-        state: directory
-        mode: 0755
+      - name: Create data folder
+        ansible.builtin.file:
+            path: /data/database/postgres
+            state: directory
+            mode: 0755
 
-    - name: Start Postgres
-      community.docker.docker_container:
-        name: postgres
-        image: postgres:15.1
-        restart_policy: always
-        detach: true
-        env:
-          POSTGRES_DB: "{{ default_db }}"
-          POSTGRES_USER: "{{ db_user }}"
-          POSTGRES_PASSWORD: "{{ db_password }}"
-          TZ: "Asia/Taipei"
-        volumes:
-          - /data/database/postgres:/var/lib/postgresql/data
-        networks:
-          - name: "{{ network_name }}"
-            ipv4_address: "{{ ip_postgres }}"
+      - name: Start Postgres
+        community.docker.docker_container:
+            name: postgres
+            image: postgres:15.1
+            restart_policy: always
+            detach: true
+            env:
+                POSTGRES_DB: "{{ default_db }}"
+                POSTGRES_USER: "{{ db_user }}"
+                POSTGRES_PASSWORD: "{{ db_password }}"
+                TZ: "Asia/Taipei"
+            volumes:
+                - /data/database/postgres:/var/lib/postgresql/data
+            networks:
+                - name: "{{ network_name }}"
+                  ipv4_address: "{{ ip_postgres }}"

@@ -1,5 +1,5 @@
 # code: language=ansible
 - name: Restart ntp
   ansible.builtin.systemd:
-    name: systemd-timesyncd
-    state: restarted
+      name: systemd-timesyncd
+      state: restarted
