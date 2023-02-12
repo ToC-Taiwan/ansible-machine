@@ -28,6 +28,9 @@ jobs:
             - name: checkout
               uses: actions/checkout@v3
 
+            - name: install required
+              run: make install
+
             - name: play basic
               if: "${{ github.event.inputs.action == 'basic' }}"
               run: echo "ACTION_TO_RUN=basic" >> ${GITHUB_ENV}
