@@ -1,684 +1,685 @@
 {
-    "dashboard": {
-        "annotations": {
-            "list": [
-                {
-                    "builtIn": 1,
-                    "datasource": {
-                        "type": "datasource",
-                        "uid": "grafana"
-                    },
-                    "enable": true,
-                    "hide": true,
-                    "iconColor": "rgba(0, 211, 255, 1)",
-                    "name": "Annotations & Alerts",
-                    "target": {
-                        "limit": 100,
-                        "matchAny": false,
-                        "tags": [],
-                        "type": "dashboard"
-                    },
-                    "type": "dashboard"
-                }
-            ]
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "datasource",
+          "uid": "grafana"
         },
-        "description": "ToC Machine Trading",
-        "editable": true,
-        "fiscalYearStartMonth": 0,
-        "graphTooltip": 0,
-        "links": [],
-        "liveNow": false,
-        "panels": [
-            {
-                "datasource": {
-                    "type": "prometheus",
-                    "uid": "{{ prometheus_id }}"
-                },
-                "gridPos": {
-                    "h": 5,
-                    "w": 7,
-                    "x": 0,
-                    "y": 0
-                },
-                "id": 18,
-                "options": {
-                    "bgColor": "transparent",
-                    "clockType": "custom",
-                    "countdownSettings": {
-                        "endCountdownTime": "2021-11-25T19:34:51+08:00",
-                        "endText": "00:00:00"
-                    },
-                    "countupSettings": {
-                        "beginCountupTime": "2022-03-28T15:51:00+08:00",
-                        "beginText": "00:00:00"
-                    },
-                    "dateSettings": {
-                        "dateFormat": "YYYY-MM-DD",
-                        "fontSize": "40px",
-                        "fontWeight": "normal",
-                        "locale": "",
-                        "showDate": true
-                    },
-                    "mode": "time",
-                    "refresh": "sec",
-                    "timeSettings": {
-                        "customFormat": "wo dddd",
-                        "fontSize": "40px",
-                        "fontWeight": "normal"
-                    },
-                    "timezone": "",
-                    "timezoneSettings": {
-                        "fontSize": "12px",
-                        "fontWeight": "normal",
-                        "showTimezone": false,
-                        "zoneFormat": "offsetAbbv"
-                    }
-                },
-                "pluginVersion": "2.1.2",
-                "targets": [
-                    {
-                        "datasource": {
-                            "type": "prometheus",
-                            "uid": "{{ prometheus_id }}"
-                        },
-                        "refId": "A"
-                    }
-                ],
-                "transparent": true,
-                "type": "grafana-clock-panel"
-            },
-            {
-                "datasource": {
-                    "type": "prometheus",
-                    "uid": "{{ prometheus_id }}"
-                },
-                "gridPos": {
-                    "h": 5,
-                    "w": 5,
-                    "x": 7,
-                    "y": 0
-                },
-                "id": 24,
-                "options": {
-                    "bgColor": "transparent",
-                    "clockType": "custom",
-                    "countdownSettings": {
-                        "endCountdownTime": "2021-11-25T19:34:51+08:00",
-                        "endText": "00:00:00"
-                    },
-                    "countupSettings": {
-                        "beginCountupTime": "2022-03-28T15:51:00+08:00",
-                        "beginText": "00:00:00"
-                    },
-                    "dateSettings": {
-                        "dateFormat": "dddd",
-                        "fontSize": "40px",
-                        "fontWeight": "normal",
-                        "locale": "",
-                        "showDate": false
-                    },
-                    "mode": "time",
-                    "refresh": "sec",
-                    "timeSettings": {
-                        "customFormat": "HH:mm:ss",
-                        "fontSize": "65px",
-                        "fontWeight": "bold"
-                    },
-                    "timezone": "",
-                    "timezoneSettings": {
-                        "fontSize": "12px",
-                        "fontWeight": "normal",
-                        "showTimezone": false,
-                        "zoneFormat": "offsetAbbv"
-                    }
-                },
-                "pluginVersion": "2.1.2",
-                "targets": [
-                    {
-                        "datasource": {
-                            "type": "prometheus",
-                            "uid": "{{ prometheus_id }}"
-                        },
-                        "refId": "A"
-                    }
-                ],
-                "transparent": true,
-                "type": "grafana-clock-panel"
-            },
-            {
-                "datasource": {
-                    "type": "prometheus",
-                    "uid": "{{ prometheus_id }}"
-                },
-                "fieldConfig": {
-                    "defaults": {
-                        "color": {
-                            "mode": "thresholds"
-                        },
-                        "mappings": [],
-                        "max": 100,
-                        "thresholds": {
-                            "mode": "percentage",
-                            "steps": [
-                                {
-                                    "color": "green",
-                                    "value": null
-                                },
-                                {
-                                    "color": "#EAB839",
-                                    "value": 50
-                                },
-                                {
-                                    "color": "red",
-                                    "value": 80
-                                }
-                            ]
-                        },
-                        "unit": "percent"
-                    },
-                    "overrides": []
-                },
-                "gridPos": {
-                    "h": 5,
-                    "w": 6,
-                    "x": 12,
-                    "y": 0
-                },
-                "id": 23,
-                "options": {
-                    "displayMode": "lcd",
-                    "minVizHeight": 10,
-                    "minVizWidth": 0,
-                    "orientation": "auto",
-                    "reduceOptions": {
-                        "calcs": [
-                            "lastNotNull"
-                        ],
-                        "fields": "",
-                        "values": false
-                    },
-                    "showUnfilled": true
-                },
-                "pluginVersion": "9.3.2",
-                "targets": [
-                    {
-                        "datasource": {
-                            "type": "prometheus",
-                            "uid": "{{ prometheus_id }}"
-                        },
-                        "editorMode": "code",
-                        "expr": "100-avg(irate(node_cpu_seconds_total{mode=\"idle\"}[1m]))*100",
-                        "hide": false,
-                        "legendFormat": "CPU",
-                        "range": true,
-                        "refId": "C"
-                    }
-                ],
-                "title": "CPU",
-                "transparent": true,
-                "type": "bargauge"
-            },
-            {
-                "datasource": {
-                    "type": "prometheus",
-                    "uid": "{{ prometheus_id }}"
-                },
-                "fieldConfig": {
-                    "defaults": {
-                        "color": {
-                            "mode": "thresholds"
-                        },
-                        "decimals": 2,
-                        "mappings": [],
-                        "max": 100,
-                        "thresholds": {
-                            "mode": "percentage",
-                            "steps": [
-                                {
-                                    "color": "green",
-                                    "value": null
-                                },
-                                {
-                                    "color": "#EAB839",
-                                    "value": 50
-                                },
-                                {
-                                    "color": "red",
-                                    "value": 80
-                                }
-                            ]
-                        },
-                        "unit": "percent"
-                    },
-                    "overrides": []
-                },
-                "gridPos": {
-                    "h": 5,
-                    "w": 6,
-                    "x": 18,
-                    "y": 0
-                },
-                "id": 22,
-                "options": {
-                    "displayMode": "lcd",
-                    "minVizHeight": 10,
-                    "minVizWidth": 0,
-                    "orientation": "auto",
-                    "reduceOptions": {
-                        "calcs": [
-                            "lastNotNull"
-                        ],
-                        "fields": "",
-                        "values": false
-                    },
-                    "showUnfilled": true
-                },
-                "pluginVersion": "9.3.2",
-                "targets": [
-                    {
-                        "datasource": {
-                            "type": "prometheus",
-                            "uid": "{{ prometheus_id }}"
-                        },
-                        "editorMode": "code",
-                        "expr": "100-100*(node_memory_MemAvailable_bytes{job=\"trader-exporter\"}/node_memory_MemTotal_bytes{job=\"trader-exporter\"})",
-                        "hide": false,
-                        "legendFormat": "CPU",
-                        "range": true,
-                        "refId": "C"
-                    }
-                ],
-                "title": "Memory",
-                "transparent": true,
-                "type": "bargauge"
-            },
-            {
-                "datasource": {
-                    "type": "prometheus",
-                    "uid": "{{ prometheus_id }}"
-                },
-                "fieldConfig": {
-                    "defaults": {
-                        "color": {
-                            "mode": "palette-classic"
-                        },
-                        "custom": {
-                            "axisCenteredZero": false,
-                            "axisColorMode": "text",
-                            "axisGridShow": false,
-                            "axisLabel": "",
-                            "axisPlacement": "left",
-                            "barAlignment": 0,
-                            "drawStyle": "line",
-                            "fillOpacity": 20,
-                            "gradientMode": "hue",
-                            "hideFrom": {
-                                "legend": false,
-                                "tooltip": false,
-                                "viz": false
-                            },
-                            "lineInterpolation": "stepAfter",
-                            "lineWidth": 2,
-                            "pointSize": 5,
-                            "scaleDistribution": {
-                                "log": 2,
-                                "type": "log"
-                            },
-                            "showPoints": "auto",
-                            "spanNulls": false,
-                            "stacking": {
-                                "group": "A",
-                                "mode": "none"
-                            },
-                            "thresholdsStyle": {
-                                "mode": "off"
-                            }
-                        },
-                        "decimals": 2,
-                        "mappings": [],
-                        "thresholds": {
-                            "mode": "percentage",
-                            "steps": [
-                                {
-                                    "color": "green",
-                                    "value": null
-                                }
-                            ]
-                        },
-                        "unit": "percent"
-                    },
-                    "overrides": []
-                },
-                "gridPos": {
-                    "h": 11,
-                    "w": 12,
-                    "x": 0,
-                    "y": 5
-                },
-                "id": 4,
-                "options": {
-                    "legend": {
-                        "calcs": [],
-                        "displayMode": "list",
-                        "placement": "bottom",
-                        "showLegend": true
-                    },
-                    "tooltip": {
-                        "mode": "multi",
-                        "sort": "none"
-                    }
-                },
-                "targets": [
-                    {
-                        "datasource": {
-                            "type": "prometheus",
-                            "uid": "{{ prometheus_id }}"
-                        },
-                        "editorMode": "code",
-                        "exemplar": false,
-                        "expr": "rate(process_cpu_seconds_total{job=\"toc-machine-trading\"}[$__rate_interval])",
-                        "interval": "",
-                        "legendFormat": "{{ '{{' }} job {{ '}}' }}",
-                        "range": true,
-                        "refId": "A"
-                    },
-                    {
-                        "datasource": {
-                            "type": "prometheus",
-                            "uid": "{{ prometheus_id }}"
-                        },
-                        "editorMode": "code",
-                        "expr": "rate(process_cpu_seconds_total{job=\"toc-sinopac-python\"}[$__rate_interval])",
-                        "hide": false,
-                        "legendFormat": "{{ '{{' }}job{{ '}}' }}",
-                        "range": true,
-                        "refId": "B"
-                    },
-                    {
-                        "datasource": {
-                            "type": "prometheus",
-                            "uid": "{{ prometheus_id }}"
-                        },
-                        "editorMode": "code",
-                        "expr": "rate(process_cpu_seconds_total{job=\"toc-fugle-python\"}[$__rate_interval])",
-                        "hide": false,
-                        "legendFormat": "{{ '{{' }}job{{ '}}' }}",
-                        "range": true,
-                        "refId": "C"
-                    }
-                ],
-                "title": "Process CPU Usage",
-                "transparent": true,
-                "type": "timeseries"
-            },
-            {
-                "datasource": {
-                    "type": "loki",
-                    "uid": "{{ loki_id }}"
-                },
-                "gridPos": {
-                    "h": 26,
-                    "w": 12,
-                    "x": 12,
-                    "y": 5
-                },
-                "id": 19,
-                "options": {
-                    "dedupStrategy": "none",
-                    "enableLogDetails": true,
-                    "prettifyLogMessage": false,
-                    "showCommonLabels": false,
-                    "showLabels": false,
-                    "showTime": false,
-                    "sortOrder": "Descending",
-                    "wrapLogMessage": false
-                },
-                "targets": [
-                    {
-                        "datasource": {
-                            "type": "loki",
-                            "uid": "{{ loki_id }}"
-                        },
-                        "editorMode": "code",
-                        "expr": "{container_name=~\"toc-machine-trading|toc-sinopac-python|toc-fugle-python\"}",
-                        "queryType": "range",
-                        "refId": "A"
-                    }
-                ],
-                "title": "logs",
-                "transformations": [],
-                "transparent": true,
-                "type": "logs"
-            },
-            {
-                "datasource": {
-                    "type": "prometheus",
-                    "uid": "{{ prometheus_id }}"
-                },
-                "fieldConfig": {
-                    "defaults": {
-                        "color": {
-                            "mode": "palette-classic"
-                        },
-                        "custom": {
-                            "axisCenteredZero": false,
-                            "axisColorMode": "text",
-                            "axisGridShow": false,
-                            "axisLabel": "",
-                            "axisPlacement": "left",
-                            "barAlignment": 0,
-                            "drawStyle": "line",
-                            "fillOpacity": 20,
-                            "gradientMode": "hue",
-                            "hideFrom": {
-                                "legend": false,
-                                "tooltip": false,
-                                "viz": false
-                            },
-                            "lineInterpolation": "stepAfter",
-                            "lineWidth": 2,
-                            "pointSize": 5,
-                            "scaleDistribution": {
-                                "type": "linear"
-                            },
-                            "showPoints": "auto",
-                            "spanNulls": false,
-                            "stacking": {
-                                "group": "A",
-                                "mode": "none"
-                            },
-                            "thresholdsStyle": {
-                                "mode": "off"
-                            }
-                        },
-                        "decimals": 0,
-                        "mappings": [],
-                        "thresholds": {
-                            "mode": "absolute",
-                            "steps": [
-                                {
-                                    "color": "green",
-                                    "value": null
-                                }
-                            ]
-                        },
-                        "unit": "decmbytes"
-                    },
-                    "overrides": []
-                },
-                "gridPos": {
-                    "h": 11,
-                    "w": 12,
-                    "x": 0,
-                    "y": 16
-                },
-                "id": 6,
-                "options": {
-                    "legend": {
-                        "calcs": [],
-                        "displayMode": "list",
-                        "placement": "bottom",
-                        "showLegend": true
-                    },
-                    "tooltip": {
-                        "mode": "multi",
-                        "sort": "none"
-                    }
-                },
-                "targets": [
-                    {
-                        "datasource": {
-                            "type": "prometheus",
-                            "uid": "{{ prometheus_id }}"
-                        },
-                        "editorMode": "code",
-                        "expr": "process_resident_memory_bytes{job=\"toc-machine-trading\"}/1024/1024",
-                        "hide": false,
-                        "legendFormat": "{{ '{{' }}job{{ '}}' }}",
-                        "range": true,
-                        "refId": "A"
-                    },
-                    {
-                        "datasource": {
-                            "type": "prometheus",
-                            "uid": "{{ prometheus_id }}"
-                        },
-                        "editorMode": "code",
-                        "expr": "process_resident_memory_bytes{job=\"toc-sinopac-python\"}/1024/1024",
-                        "hide": false,
-                        "legendFormat": "{{ '{{' }}job{{ '}}' }}",
-                        "range": true,
-                        "refId": "B"
-                    },
-                    {
-                        "datasource": {
-                            "type": "prometheus",
-                            "uid": "{{ prometheus_id }}"
-                        },
-                        "editorMode": "code",
-                        "expr": "process_resident_memory_bytes{job=\"toc-fugle-python\"}/1024/1024",
-                        "hide": false,
-                        "legendFormat": "{{ '{{' }}job{{ '}}' }}",
-                        "range": true,
-                        "refId": "D"
-                    }
-                ],
-                "title": "Process Memory Usage",
-                "transparent": true,
-                "type": "timeseries"
-            },
-            {
-                "datasource": {
-                    "type": "prometheus",
-                    "uid": "{{ prometheus_id }}"
-                },
-                "fieldConfig": {
-                    "defaults": {
-                        "color": {
-                            "mode": "palette-classic"
-                        },
-                        "custom": {
-                            "axisCenteredZero": false,
-                            "axisColorMode": "text",
-                            "axisGridShow": false,
-                            "axisLabel": "",
-                            "axisPlacement": "left",
-                            "barAlignment": 0,
-                            "drawStyle": "line",
-                            "fillOpacity": 20,
-                            "gradientMode": "hue",
-                            "hideFrom": {
-                                "legend": false,
-                                "tooltip": false,
-                                "viz": false
-                            },
-                            "lineInterpolation": "stepAfter",
-                            "lineWidth": 2,
-                            "pointSize": 5,
-                            "scaleDistribution": {
-                                "type": "linear"
-                            },
-                            "showPoints": "auto",
-                            "spanNulls": false,
-                            "stacking": {
-                                "group": "A",
-                                "mode": "none"
-                            },
-                            "thresholdsStyle": {
-                                "mode": "off"
-                            }
-                        },
-                        "decimals": 0,
-                        "mappings": [],
-                        "thresholds": {
-                            "mode": "absolute",
-                            "steps": [
-                                {
-                                    "color": "green",
-                                    "value": null
-                                }
-                            ]
-                        },
-                        "unit": "none"
-                    },
-                    "overrides": []
-                },
-                "gridPos": {
-                    "h": 4,
-                    "w": 12,
-                    "x": 0,
-                    "y": 27
-                },
-                "id": 25,
-                "options": {
-                    "legend": {
-                        "calcs": [],
-                        "displayMode": "list",
-                        "placement": "bottom",
-                        "showLegend": false
-                    },
-                    "tooltip": {
-                        "mode": "multi",
-                        "sort": "none"
-                    }
-                },
-                "targets": [
-                    {
-                        "datasource": {
-                            "type": "prometheus",
-                            "uid": "{{ prometheus_id }}"
-                        },
-                        "editorMode": "code",
-                        "expr": "rate(rabbitmq_channel_messages_published_total{job=\"toc-rabbitmq\"}[1m])",
-                        "hide": false,
-                        "legendFormat": "{{ '{{' }}job{{ '}}' }}",
-                        "range": true,
-                        "refId": "D"
-                    }
-                ],
-                "title": "MQ Rate",
-                "transparent": true,
-                "type": "timeseries"
-            }
-        ],
-        "refresh": "5s",
-        "schemaVersion": 37,
-        "style": "dark",
-        "tags": [
-            "TMT"
-        ],
-        "templating": {
-            "list": []
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "target": {
+          "limit": 100,
+          "matchAny": false,
+          "tags": [],
+          "type": "dashboard"
         },
-        "time": {
-            "from": "now-6h",
-            "to": "now"
+        "type": "dashboard"
+      }
+    ]
+  },
+  "description": "ToC Machine Trading",
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 1,
+  "links": [],
+  "liveNow": false,
+  "panels": [
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "{{ prometheus_id }}"
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 7,
+        "x": 0,
+        "y": 0
+      },
+      "id": 18,
+      "options": {
+        "bgColor": "transparent",
+        "clockType": "custom",
+        "countdownSettings": {
+          "endCountdownTime": "2021-11-25T19:34:51+08:00",
+          "endText": "00:00:00"
         },
-        "timepicker": {},
+        "countupSettings": {
+          "beginCountupTime": "2022-03-28T15:51:00+08:00",
+          "beginText": "00:00:00"
+        },
+        "dateSettings": {
+          "dateFormat": "YYYY-MM-DD",
+          "fontSize": "40px",
+          "fontWeight": "normal",
+          "locale": "",
+          "showDate": true
+        },
+        "mode": "time",
+        "refresh": "sec",
+        "timeSettings": {
+          "customFormat": "wo dddd",
+          "fontSize": "40px",
+          "fontWeight": "normal"
+        },
         "timezone": "",
-        "title": "ToC Machine Trading Monitor",
-        "uid": "jio-vSp7z",
-        "version": 2,
-        "weekStart": ""
+        "timezoneSettings": {
+          "fontSize": "12px",
+          "fontWeight": "normal",
+          "showTimezone": false,
+          "zoneFormat": "offsetAbbv"
+        }
+      },
+      "pluginVersion": "2.1.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{ prometheus_id }}"
+          },
+          "refId": "A"
+        }
+      ],
+      "transparent": true,
+      "type": "grafana-clock-panel"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "{{ prometheus_id }}"
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 5,
+        "x": 7,
+        "y": 0
+      },
+      "id": 24,
+      "options": {
+        "bgColor": "transparent",
+        "clockType": "custom",
+        "countdownSettings": {
+          "endCountdownTime": "2021-11-25T19:34:51+08:00",
+          "endText": "00:00:00"
+        },
+        "countupSettings": {
+          "beginCountupTime": "2022-03-28T15:51:00+08:00",
+          "beginText": "00:00:00"
+        },
+        "dateSettings": {
+          "dateFormat": "dddd",
+          "fontSize": "40px",
+          "fontWeight": "normal",
+          "locale": "",
+          "showDate": false
+        },
+        "mode": "time",
+        "refresh": "sec",
+        "timeSettings": {
+          "customFormat": "HH:mm:ss",
+          "fontSize": "65px",
+          "fontWeight": "bold"
+        },
+        "timezone": "",
+        "timezoneSettings": {
+          "fontSize": "12px",
+          "fontWeight": "normal",
+          "showTimezone": false,
+          "zoneFormat": "offsetAbbv"
+        }
+      },
+      "pluginVersion": "2.1.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{ prometheus_id }}"
+          },
+          "refId": "A"
+        }
+      ],
+      "transparent": true,
+      "type": "grafana-clock-panel"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "{{ prometheus_id }}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "#EAB839",
+                "value": 50
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 12,
+        "y": 0
+      },
+      "id": 23,
+      "options": {
+        "displayMode": "lcd",
+        "minVizHeight": 10,
+        "minVizWidth": 0,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true
+      },
+      "pluginVersion": "9.3.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{ prometheus_id }}"
+          },
+          "editorMode": "code",
+          "expr": "100-avg(irate(node_cpu_seconds_total{mode=\"idle\"}[1m]))*100",
+          "hide": false,
+          "legendFormat": "CPU",
+          "range": true,
+          "refId": "C"
+        }
+      ],
+      "title": "CPU",
+      "transparent": true,
+      "type": "bargauge"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "{{ prometheus_id }}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "decimals": 2,
+          "mappings": [],
+          "max": 100,
+          "min": 0,
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "#EAB839",
+                "value": 50
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 5,
+        "w": 6,
+        "x": 18,
+        "y": 0
+      },
+      "id": 22,
+      "options": {
+        "displayMode": "lcd",
+        "minVizHeight": 10,
+        "minVizWidth": 0,
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showUnfilled": true
+      },
+      "pluginVersion": "9.3.2",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{ prometheus_id }}"
+          },
+          "editorMode": "code",
+          "expr": "100-100*(node_memory_MemAvailable_bytes{job=\"trader-exporter\"}/node_memory_MemTotal_bytes{job=\"trader-exporter\"})",
+          "hide": false,
+          "legendFormat": "CPU",
+          "range": true,
+          "refId": "C"
+        }
+      ],
+      "title": "Memory",
+      "transparent": true,
+      "type": "bargauge"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "{{ prometheus_id }}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisGridShow": false,
+            "axisLabel": "",
+            "axisPlacement": "left",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 20,
+            "gradientMode": "hue",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "stepAfter",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "log": 2,
+              "type": "log"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 2,
+          "mappings": [],
+          "thresholds": {
+            "mode": "percentage",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "percent"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 12,
+        "x": 0,
+        "y": 5
+      },
+      "id": 4,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{ prometheus_id }}"
+          },
+          "editorMode": "code",
+          "exemplar": false,
+          "expr": "rate(process_cpu_seconds_total{job=\"toc-machine-trading\"}[$__rate_interval])",
+          "interval": "",
+          "legendFormat": "{{ '{{' }} job {{ '}}' }}",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{ prometheus_id }}"
+          },
+          "editorMode": "code",
+          "expr": "rate(process_cpu_seconds_total{job=\"toc-sinopac-python\"}[$__rate_interval])",
+          "hide": false,
+          "legendFormat": "{{ '{{' }}job{{ '}}' }}",
+          "range": true,
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{ prometheus_id }}"
+          },
+          "editorMode": "code",
+          "expr": "rate(process_cpu_seconds_total{job=\"toc-fugle-python\"}[$__rate_interval])",
+          "hide": false,
+          "legendFormat": "{{ '{{' }}job{{ '}}' }}",
+          "range": true,
+          "refId": "C"
+        }
+      ],
+      "title": "Process CPU Usage",
+      "transparent": true,
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "loki",
+        "uid": "{{ loki_id }}"
+      },
+      "gridPos": {
+        "h": 26,
+        "w": 12,
+        "x": 12,
+        "y": 5
+      },
+      "id": 19,
+      "options": {
+        "dedupStrategy": "none",
+        "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "showCommonLabels": false,
+        "showLabels": false,
+        "showTime": false,
+        "sortOrder": "Descending",
+        "wrapLogMessage": false
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "loki",
+            "uid": "{{ loki_id }}"
+          },
+          "editorMode": "code",
+          "expr": "{container_name=~\"toc-machine-trading|toc-sinopac-python|toc-fugle-python\"}",
+          "queryType": "range",
+          "refId": "A"
+        }
+      ],
+      "title": "logs",
+      "transformations": [],
+      "transparent": true,
+      "type": "logs"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "{{ prometheus_id }}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisGridShow": false,
+            "axisLabel": "",
+            "axisPlacement": "left",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 20,
+            "gradientMode": "hue",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "stepAfter",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "decmbytes"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 12,
+        "x": 0,
+        "y": 16
+      },
+      "id": 6,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{ prometheus_id }}"
+          },
+          "editorMode": "code",
+          "expr": "process_resident_memory_bytes{job=\"toc-machine-trading\"}/1024/1024",
+          "hide": false,
+          "legendFormat": "{{ '{{' }}job{{ '}}' }}",
+          "range": true,
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{ prometheus_id }}"
+          },
+          "editorMode": "code",
+          "expr": "process_resident_memory_bytes{job=\"toc-sinopac-python\"}/1024/1024",
+          "hide": false,
+          "legendFormat": "{{ '{{' }}job{{ '}}' }}",
+          "range": true,
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{ prometheus_id }}"
+          },
+          "editorMode": "code",
+          "expr": "process_resident_memory_bytes{job=\"toc-fugle-python\"}/1024/1024",
+          "hide": false,
+          "legendFormat": "{{ '{{' }}job{{ '}}' }}",
+          "range": true,
+          "refId": "D"
+        }
+      ],
+      "title": "Process Memory Usage",
+      "transparent": true,
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "{{ prometheus_id }}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisGridShow": false,
+            "axisLabel": "",
+            "axisPlacement": "left",
+            "barAlignment": 0,
+            "drawStyle": "line",
+            "fillOpacity": 20,
+            "gradientMode": "hue",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "stepAfter",
+            "lineWidth": 2,
+            "pointSize": 5,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 4,
+        "w": 12,
+        "x": 0,
+        "y": 27
+      },
+      "id": 25,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "tooltip": {
+          "mode": "multi",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "{{ prometheus_id }}"
+          },
+          "editorMode": "code",
+          "expr": "rate(rabbitmq_channel_messages_published_total{job=\"toc-rabbitmq\"}[1m])",
+          "hide": false,
+          "legendFormat": "{{ '{{' }}job{{ '}}' }}",
+          "range": true,
+          "refId": "D"
+        }
+      ],
+      "title": "MQ Rate",
+      "transparent": true,
+      "type": "timeseries"
     }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 37,
+  "style": "dark",
+  "tags": [
+    "TMT"
+  ],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "ToC Machine Trading Monitor",
+  "uid": "jio-vSp7z",
+  "version": 2,
+  "weekStart": ""
 }
