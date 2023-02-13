@@ -41,7 +41,7 @@ ansible all -m ping -i inventory
 
 - Get IP
 
-```ansible
+```yaml
 - name: Setting host IP and Port
   ansible.builtin.set_fact:
     remote_ip: "{{ hostvars[inventory_hostname]['ansible_env'].SSH_CONNECTION.split(' ')[2] }}"
@@ -69,7 +69,7 @@ all:
         ansible_user: root
 ```
 
-## Debian initial
+## Debian machine initial
 
 - Use root
 
@@ -85,11 +85,12 @@ apt autoremove -y' > /root/update.sh && \
 chmod +x /root/update.sh
 /root/update.sh
 
+# replace p_key with your public key
+p_key="ssh-ed25519 blahblahblah"
+
 echo '#!/bin/bash
-usermod -aG sudo timhsu
-timhsukey="ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHEtmV/jvROZGXNUak4JnN0hljHUTDq8bysfTYT0eaJ6 maochindada@gmail.com"
 mkdir ~/.ssh
-echo $timhsukey > ~/.ssh/authorized_keys
+echo '${p_key}' > ~/.ssh/authorized_keys
 ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519 -q -N "" -C $HOSTNAME
 eval "$(ssh-agent -s)"
 ssh-add ~/.ssh/id_ed25519
@@ -102,10 +103,9 @@ chmod +x ./first_init.sh && \
 ./first_init.sh && \
 rm -f ./first_init.sh
 
+# if interface name is not ens224, replace it
 echo 'allow-hotplug ens224
 iface ens224 inet dhcp' >> /etc/network/interfaces
-
-apt install -y git sudo curl
 ```
 
 ## Example
