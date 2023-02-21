@@ -108,6 +108,14 @@ echo 'allow-hotplug ens224
 iface ens224 inet dhcp' >> /etc/network/interfaces
 ```
 
+## Reset python environment
+
+```sh
+pip3 freeze > requirements.txt
+pip3 uninstall -y -r requirements.txt
+rm -rf requirements.txt
+```
+
 ## Example
 
 - ### [Let's Encrypt](./examples/self-hosted-cert.md)
