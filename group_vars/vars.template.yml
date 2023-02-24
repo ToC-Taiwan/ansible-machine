@@ -73,3 +73,6 @@ mt_config:
         rate_change_ratio:
         out_in_ratio:
         in_out_ratio:
+
+    slack_token:
+    slack_channel_id:
