@@ -18,7 +18,7 @@
   ansible.builtin.template:
       src: timesyncd.conf.j2
       dest: /etc/systemd/timesyncd.conf
-      mode: 0600
+      mode: "600"
   notify:
       - Restart ntp
 
@@ -44,13 +44,13 @@
         ansible.builtin.get_url:
             url: https://download.docker.com/linux/debian/gpg
             dest: ~/key
-            mode: 0600
+            mode: "600"
 
       - name: Create key folder
         ansible.builtin.file:
             path: /etc/apt/keyrings
             state: directory
-            mode: 0755
+            mode: "755"
 
       - name: Dearmor key
         ansible.builtin.shell: gpg --dearmor --batch --yes -o /etc/apt/keyrings/docker.gpg ~/key && rm ~/key

@@ -17,13 +17,13 @@
         ansible.builtin.file:
             path: /root/loki-config
             state: directory
-            mode: 0755
+            mode: "755"
 
       - name: Configure Loki
         ansible.builtin.template:
             src: loki.j2
             dest: /root/loki-config/loki.yaml
-            mode: 0644
+            mode: "644"
 
       - name: Start Loki
         community.docker.docker_container:
@@ -50,13 +50,13 @@
         ansible.builtin.file:
             path: /root/prometheus-config
             state: directory
-            mode: 0755
+            mode: "755"
 
       - name: Configure Prometheus
         ansible.builtin.template:
             src: prometheus.j2
             dest: /root/prometheus-config/prometheus.yml
-            mode: 0644
+            mode: "644"
 
       - name: Start Prometheus
         community.docker.docker_container:
@@ -137,26 +137,29 @@
             return_content: true
         register: http_response
 
-      - name: Parse JSON response
+      - name: Parse JSON response for prometheus
         ansible.builtin.set_fact:
-            datasources: "{{ http_response.content | from_json }}"
+            prometheus_id: "{{ item.uid }}"
+        loop: "{{ http_response.content | from_json }}"
+        when: item.name == "Prometheus"
 
-      - name: Set datasource id from json
+      - name: Parse JSON response for loki
         ansible.builtin.set_fact:
-            prometheus_id: "{{ datasources[1] | json_query('uid') }}"
-            loki_id: "{{ datasources[0] | json_query('uid') }}"
+            loki_id: "{{ item.uid }}"
+        loop: "{{ http_response.content | from_json }}"
+        when: item.name == "Loki"
 
       - name: Create config folder
         ansible.builtin.file:
             path: /root/grafana-config
             state: directory
-            mode: 0755
+            mode: "755"
 
       - name: Configure Dashboard
         ansible.builtin.template:
             src: dashboard.j2
             dest: /root/grafana-config/dashboard.json
-            mode: 0644
+            mode: "644"
 
       - name: Read remote config file
         ansible.builtin.slurp:
@@ -185,7 +188,7 @@
         ansible.builtin.file:
             path: /data/database/postgres
             state: directory
-            mode: 0755
+            mode: "755"
 
       - name: Start Postgres
         community.docker.docker_container:
