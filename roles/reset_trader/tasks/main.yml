@@ -1,9 +1,4 @@
 # code: language=ansible
-- name: Remove toc-rabbitmq
-  community.docker.docker_container:
-      name: toc-rabbitmq
-      state: absent
-
 - name: Remove toc-machine-trading
   community.docker.docker_container:
       name: toc-machine-trading
@@ -19,14 +14,19 @@
       name: toc-fugle-python
       state: absent
 
-- name: Remove node-exporter
+- name: Remove toc-rabbitmq
   community.docker.docker_container:
-      name: node-exporter
+      name: toc-rabbitmq
       state: absent
 
 - name: Remove nginx
   community.docker.docker_container:
       name: nginx
+      state: absent
+
+- name: Remove node-exporter
+  community.docker.docker_container:
+      name: node-exporter
       state: absent
 
 - name: Prune everything (including non-dangling images)
