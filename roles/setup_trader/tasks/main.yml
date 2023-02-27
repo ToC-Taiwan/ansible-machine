@@ -98,18 +98,64 @@
             host: "{{ ip_rabbitmq }}"
             timeout: 120
 
+- name: Check docker hub remaining pull limit
+  block:
+      - name: Get temp docker token
+        ansible.builtin.uri:
+            url: https://auth.docker.io/token?service=registry.docker.io&scope=repository:ratelimitpreview/test:pull
+            user: "{{ github_user }}"
+            password: "{{ docker_password }}"
+            method: GET
+            return_content: true
+        register: http_response
+
+      - name: Parse token
+        ansible.builtin.set_fact:
+            temp_docker_token: "{{ http_response.content | from_json | json_query('token') }}"
+
+      - name: Get remaining
+        ansible.builtin.uri:
+            url: https://registry-1.docker.io/v2/ratelimitpreview/test/manifests/latest
+            headers:
+                Authorization: "Bearer {{ temp_docker_token }}"
+            method: GET
+            return_content: true
+        register: http_response_remaining
+
+      - name: Parse remaining
+        ansible.builtin.set_fact:
+            docker_remaining: "{{ http_response_remaining.ratelimit_remaining | split(';') }}"
+
+      - name: Use docker hub
+        ansible.builtin.set_fact:
+            image_owner: "{{ docker_user }}"
+            use_registry: "docker"
+        when: docker_remaining[0] | int > 10
+
+      - name: Use github container registry
+        ansible.builtin.set_fact:
+            image_owner: ghcr.io/toc-taiwan
+            use_registry: "github"
+        when: docker_remaining[0] | int < 10
+
+      - name: Decide registry
+        ansible.builtin.debug:
+            msg: "Use {{ image_owner }}, remaining {{ docker_remaining[0] }}"
+
 - name: Login Github Container Registry
   community.docker.docker_login:
       registry_url: ghcr.io
       username: "{{ github_user }}"
       password: "{{ github_token }}"
       reauthorize: true
+  when: use_registry == "github"
 
 - name: Login Docker Hub Container Registry
   community.docker.docker_login:
       username: "{{ docker_user }}"
       password: "{{ docker_token }}"
       reauthorize: true
+  when: use_registry == "docker"
 
 - name: ToC Sinopac Python
   block:
@@ -126,7 +172,7 @@
       - name: Start ToC Sinopac Python
         community.docker.docker_container:
             name: toc-sinopac-python
-            image: "{{ docker_user }}/toc-sinopac-python:latest"
+            image: "{{ image_owner }}/toc-sinopac-python:latest"
             restart_policy: always
             detach: true
             volumes:
@@ -153,7 +199,7 @@
       - name: Start ToC Fugle Python
         community.docker.docker_container:
             name: toc-fugle-python
-            image: "{{ docker_user }}/toc-fugle-python:latest"
+            image: "{{ image_owner }}/toc-fugle-python:latest"
             restart_policy: always
             detach: true
             volumes:
@@ -191,7 +237,7 @@
       - name: Start ToC Machine Trading
         community.docker.docker_container:
             name: toc-machine-trading
-            image: "{{ docker_user }}/toc-machine-trading:latest"
+            image: "{{ image_owner }}/toc-machine-trading:latest"
             restart_policy: always
             detach: true
             volumes:
