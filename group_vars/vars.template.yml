@@ -33,6 +33,9 @@ fugle_ca_password:
 github_user:
 github_token:
 
+docker_user:
+docker_token:
+
 mt_config:
     simulation:
 

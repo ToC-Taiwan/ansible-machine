@@ -105,6 +105,12 @@
       password: "{{ github_token }}"
       reauthorize: true
 
+- name: Login Docker Hub Container Registry
+  community.docker.docker_login:
+      username: "{{ docker_user }}"
+      password: "{{ docker_token }}"
+      reauthorize: true
+
 - name: ToC Sinopac Python
   block:
       - name: Create env folder
@@ -120,7 +126,7 @@
       - name: Start ToC Sinopac Python
         community.docker.docker_container:
             name: toc-sinopac-python
-            image: maochindada/toc-sinopac-python:latest
+            image: "{{ docker_user }}/toc-sinopac-python:latest"
             restart_policy: always
             detach: true
             volumes:
@@ -147,7 +153,7 @@
       - name: Start ToC Fugle Python
         community.docker.docker_container:
             name: toc-fugle-python
-            image: maochindada/toc-fugle-python:latest
+            image: "{{ docker_user }}/toc-fugle-python:latest"
             restart_policy: always
             detach: true
             volumes:
@@ -185,7 +191,7 @@
       - name: Start ToC Machine Trading
         community.docker.docker_container:
             name: toc-machine-trading
-            image: maochindada/toc-machine-trading:latest
+            image: "{{ docker_user }}/toc-machine-trading:latest"
             restart_policy: always
             detach: true
             volumes:

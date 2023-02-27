@@ -1,4 +1,9 @@
 # code: language=ansible
+- name: Clear dns cache
+  ansible.builtin.systemd:
+      name: systemd-resolved.service
+      state: restarted
+
 - name: Install APT
   ansible.builtin.apt:
       name: aptitude
@@ -67,3 +72,20 @@
             name: docker-ce
             state: present
             update_cache: true
+
+      - name: Create docker service.d directory
+        ansible.builtin.file:
+            path: /etc/systemd/system/docker.service.d
+            state: directory
+            mode: "755"
+
+      - name: Configure Docker
+        ansible.builtin.template:
+            src: docker.j2
+            dest: /etc/systemd/system/docker.service.d/override.conf
+            mode: "644"
+
+      - name: Reload docker
+        ansible.builtin.systemd:
+            name: docker
+            state: restarted
