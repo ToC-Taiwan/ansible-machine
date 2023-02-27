@@ -120,7 +120,7 @@
       - name: Start ToC Sinopac Python
         community.docker.docker_container:
             name: toc-sinopac-python
-            image: ghcr.io/toc-taiwan/toc-sinopac-python:latest
+            image: maochindada/toc-sinopac-python:latest
             restart_policy: always
             detach: true
             volumes:
@@ -147,7 +147,7 @@
       - name: Start ToC Fugle Python
         community.docker.docker_container:
             name: toc-fugle-python
-            image: ghcr.io/toc-taiwan/toc-fugle-python:latest
+            image: maochindada/toc-fugle-python:latest
             restart_policy: always
             detach: true
             volumes:
@@ -185,7 +185,7 @@
       - name: Start ToC Machine Trading
         community.docker.docker_container:
             name: toc-machine-trading
-            image: ghcr.io/toc-taiwan/toc-machine-trading:latest
+            image: maochindada/toc-machine-trading:latest
             restart_policy: always
             detach: true
             volumes:
