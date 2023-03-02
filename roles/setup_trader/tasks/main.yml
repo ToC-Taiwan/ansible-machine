@@ -103,7 +103,7 @@
       - name: Get temp docker token
         ansible.builtin.uri:
             url: https://auth.docker.io/token?service=registry.docker.io&scope=repository:ratelimitpreview/test:pull
-            user: "{{ github_user }}"
+            user: "{{ docker_user }}"
             password: "{{ docker_password }}"
             method: GET
             return_content: true
@@ -140,7 +140,7 @@
 
       - name: Decide registry
         ansible.builtin.debug:
-            msg: "Use {{ image_owner }}, remaining {{ docker_remaining[0] }}"
+            msg: "Use {{ use_registry }}, remaining {{ docker_remaining[0] }}"
 
 - name: Login Github Container Registry
   community.docker.docker_login:

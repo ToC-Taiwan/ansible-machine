@@ -58,8 +58,12 @@ mt_config:
         allow_trade:
         subscribe:
         quantity:
+
+        # unit: dollar
         target_balance_high:
         target_balance_low:
+
+        # unit: times
         trade_out_wait_times:
 
         # unit: seccond
@@ -72,8 +76,10 @@ mt_config:
             second_part_duration:
         max_hold_time:
 
-        # unit: %
+        # unit: volume/second
         rate_limit:
+
+        # unit: %
         rate_change_ratio:
         out_in_ratio:
         in_out_ratio:

@@ -18,8 +18,12 @@ trade_future:
     allow_trade: {{ mt_config.trade_future.allow_trade }}
     subscribe: {{ mt_config.trade_future.subscribe }}
     quantity: {{ mt_config.trade_future.quantity }}
+
+    # unit: dollar
     target_balance_high: {{ mt_config.trade_future.target_balance_high }}
     target_balance_low: {{ mt_config.trade_future.target_balance_low }}
+
+    # unit: times
     trade_out_wait_times: {{ mt_config.trade_future.trade_out_wait_times }}
 
     # unit: seccond
@@ -32,8 +36,10 @@ trade_future:
         second_part_duration: {{ mt_config.trade_future.trade_time_range.second_part_duration }}
     max_hold_time: {{ mt_config.trade_future.max_hold_time }}
 
+    # unit: volume/second
+    rate_limit:: {{ mt_config.trade_future.rate_limit }}
+
     # unit: %
-    rate_limit: {{ mt_config.trade_future.rate_limit }}
     rate_change_ratio: {{ mt_config.trade_future.rate_change_ratio }}
     out_in_ratio: {{ mt_config.trade_future.out_in_ratio }}
     in_out_ratio: {{ mt_config.trade_future.in_out_ratio }}

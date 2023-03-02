@@ -1,5 +1,5 @@
-name: Actions
-run-name: ${{ github.actor }} is playing books 🔱
+name: Playbooks
+# run-name: ${{ github.actor }} is playing books 🔱
 
 on:
     workflow_dispatch:
