@@ -84,5 +84,8 @@ mt_config:
         out_in_ratio:
         in_out_ratio:
 
+    history:
+        trigger_simulate: false
+
     slack_token:
     slack_channel_id:
