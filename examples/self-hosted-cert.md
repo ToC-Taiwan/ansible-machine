@@ -1,9 +1,11 @@
 # Let's Encrypt
 
-- new cert: make sure `172.20.10.225` is exposed to internet
+- new cert: make sure `$server_ip` is exposed to internet
 
 ```sh
-cert_path=/root/certbot_data
+cert_path="/root/certbot_data"
+domain_name="blog.tocandraw.com"
+server_ip="172.20.10.242"
 
 rm -rf $cert_path
 mkdir -p $cert_path/www
@@ -13,16 +15,17 @@ docker stop nginx
 docker stop certbot
 docker system prune --volumes -f
 
-echo 'server {
+conf="server {
     listen 80 default_server;
     listen [::]:80 default_server;
-    server_name trader.tocraw.com;
+    server_name ${domain_name};
 
     location /.well-known/acme-challenge/ {
         root /var/www/certbot;
     }
 }
-' > nginx_default.conf
+"
+echo $conf > nginx_default.conf
 
 docker network create -d macvlan \
   --subnet=172.20.10.0/24 \
@@ -32,7 +35,7 @@ docker network create -d macvlan \
 
 docker run -d \
     --network tocvlan \
-    --ip=172.20.10.225 \
+    --ip=$server_ip \
     --restart always \
     --name nginx \
     -v $(pwd)/nginx_default.conf:/etc/nginx/conf.d/nginx_default.conf:ro\
@@ -53,9 +56,13 @@ docker run -it \
     --webroot \
     --webroot-path /var/www/certbot/ \
     -m maochindada@gmail.com \
-    -d trader.tocraw.com
+    -d $domain_name
 
-curl https://ssl-config.mozilla.org/ffdhe2048.txt > $cert_path/conf/live/trader.tocraw.com/dhparam
+curl https://ssl-config.mozilla.org/ffdhe2048.txt > $cert_path/conf/live/$domain_name/dhparam
+
+docker stop nginx
+docker stop certbot
+docker system prune --volumes -f
 rm nginx_default.conf
 ```
 
