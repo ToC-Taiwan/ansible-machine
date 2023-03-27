@@ -4,12 +4,12 @@
 [![Ansible](https://img.shields.io/badge/Ansible-2.14.3-red?logo=ansible&logoColor=red&style=for-the-badge)](https://www.ansible.com)
 [![Python](https://img.shields.io/badge/Python-3.10-yellow?logo=python&logoColor=yellow&style=for-the-badge)](https://python.org)
 
-## Install Ansible
+## Target
 
 - Debian
 
 ```sh
-python3 -m pip install ansible ansible-lint
+python3 -m pip install ansible ansible-lint jmespath
 ```
 
 ```sh
@@ -25,7 +25,15 @@ rm get-pip.py
 apt install -y python3-distutils
 ```
 
-## Check hosts
+## Deploy
+
+- install basci packages
+
+```sh
+./scripts/install_basic.sh
+```
+
+### Check hosts
 
 - list
 

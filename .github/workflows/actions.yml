@@ -29,7 +29,7 @@ jobs:
               uses: actions/checkout@v3
 
             - name: install required
-              run: make install
+              run: ./scripts/install_basic.sh
 
             - name: play basic
               if: "${{ github.event.inputs.action == 'basic' }}"
