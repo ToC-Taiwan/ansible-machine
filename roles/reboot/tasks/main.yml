@@ -1,0 +1,8 @@
+# code: language=ansible
+- name: Return motd to registered var
+  ansible.builtin.command: awk '{print int($1/3600)":"int(($1%3600)/60)":"int($1%60)}' /proc/uptime
+  register: uptime
+  changed_when: uptime.rc != 0
+
+- name: Reboot the machine with all defaults
+  ansible.builtin.reboot:

@@ -6,6 +6,12 @@
   roles:
     - basic
 
+- name: Reboot
+  tags: reboot
+  hosts: all
+  roles:
+    - reboot
+
 - name: Setup Trader
   tags: setup_trader
   vars_files: group_vars/vars.yml

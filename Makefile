@@ -6,6 +6,10 @@ basic: ### basic
 	@ansible-playbook -i inventory playbook.yml --tags basic
 .PHONY: basic
 
+reboot: ### reboot
+	@ansible-playbook -i inventory playbook.yml --tags reboot
+.PHONY: reboot
+
 reset_trader: ### reset_trader
 	@ansible-playbook -i inventory playbook.yml --tags reset_trader
 .PHONY: reset_trader
