@@ -40,7 +40,7 @@
 - name: Start node exporter
   community.docker.docker_container:
       name: node-exporter
-      image: quay.io/prometheus/node-exporter:latest
+      image: bitnami/node-exporter:1.5.0
       restart_policy: always
       detach: true
       pid_mode: host
@@ -66,7 +66,7 @@
       - name: Start Nginx
         community.docker.docker_container:
             name: nginx
-            image: nginx:latest
+            image: nginx:1.23.4
             restart_policy: always
             detach: true
             volumes:
@@ -82,7 +82,7 @@
       - name: Start Rabbitmq
         community.docker.docker_container:
             name: toc-rabbitmq
-            image: rabbitmq:3.11.5-management
+            image: rabbitmq:3.11.13-management
             restart_policy: always
             detach: true
             env:
