@@ -14,6 +14,7 @@ on:
                     - "reset_trader"
                     - "setup_trader"
                     - "reset_db"
+                    - "reboot"
                 required: true
                 default: ""
 
@@ -54,6 +55,10 @@ jobs:
             - name: play reset_db
               if: "${{ github.event.inputs.action == 'reset_db' }}"
               run: echo "ACTION_TO_RUN=reset_db" >> ${GITHUB_ENV}
+
+            - name: play reboot
+              if: "${{ github.event.inputs.action == 'reboot' }}"
+              run: echo "ACTION_TO_RUN=reboot" >> ${GITHUB_ENV}
 
             - name: configure vars
               run: |
