@@ -86,3 +86,4 @@ mt_config:
 
     slack_token:
     slack_channel_id:
+    slack_log_level:
