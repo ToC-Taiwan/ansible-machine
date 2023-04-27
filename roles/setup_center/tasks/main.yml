@@ -92,7 +92,7 @@
       - name: Start loki
         community.docker.docker_container:
             name: loki
-            image: grafana/loki:2.8.0
+            image: grafana/loki:2.8.1
             restart_policy: always
             detach: true
             volumes:
@@ -146,7 +146,7 @@
       - name: Start grafana
         community.docker.docker_container:
             name: grafana
-            image: grafana/grafana:8.5.22
+            image: grafana/grafana:8.5.24
             restart_policy: always
             detach: true
             env:
