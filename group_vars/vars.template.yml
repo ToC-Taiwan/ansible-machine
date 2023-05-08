@@ -39,6 +39,7 @@ docker_token:
 
 mt_config:
     simulation:
+    manual_trade:
 
     trade_stock:
         allow_trade:
