@@ -141,7 +141,7 @@
       - name: Start Rabbitmq
         community.docker.docker_container:
             name: toc-rabbitmq
-            image: rabbitmq:3.11.13-management
+            image: rabbitmq:3.11.15-management
             restart_policy: always
             detach: true
             env:
