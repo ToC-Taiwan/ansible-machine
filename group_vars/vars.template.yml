@@ -44,6 +44,7 @@ mt_config:
     trade_stock:
         allow_trade:
         subscribe:
+        odd:
 
         # unit: second
         hold_time_from_open:
