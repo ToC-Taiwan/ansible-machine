@@ -9,20 +9,20 @@
 - Debian
 
 ```sh
-python3 -m pip install ansible ansible-lint jmespath
-```
+# Ii will encounter `module named 'distutils.cmd'`, install `python3-distutils`
+apt install -y python3-distutils
 
-```sh
-# check pip version
-python3 -m pip -V
-
-# If No module named pip, install it
+# No module named pip, so install it
 curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
 python3 get-pip.py
 rm get-pip.py
 
-# If No module named 'distutils.cmd', install `python3-distutils`, then run again
-apt install -y python3-distutils
+# check pip version
+python3 -m pip -V
+```
+
+```sh
+python3 -m pip install ansible ansible-lint jmespath
 ```
 
 ## Deploy

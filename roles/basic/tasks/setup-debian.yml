@@ -94,6 +94,12 @@
             dest: /etc/systemd/system/docker.service.d/override.conf
             mode: "644"
 
+      - name: Configure Docker Daemon
+        ansible.builtin.template:
+            src: daemon.json.j2
+            dest: /etc/docker/daemon.json
+            mode: "644"
+
       - name: Reload docker
         ansible.builtin.systemd:
             name: docker
