@@ -1,3 +1,4 @@
 *.retry
 vars.yml
 hosts.yml
+.vscode
