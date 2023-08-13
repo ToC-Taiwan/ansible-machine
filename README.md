@@ -110,10 +110,34 @@ cat ~/.ssh/id_ed25519' > ./first_init.sh && \
 chmod +x ./first_init.sh && \
 ./first_init.sh && \
 rm -f ./first_init.sh
+```
 
+```sh
+host_ip="10.0.0.98"
 # if interface name is not ens224, replace it
-echo 'allow-hotplug ens224
-iface ens224 inet dhcp' >> /etc/network/interfaces
+echo '# This file describes the network interfaces available on your system
+# and how to activate them. For more information, see interfaces(5).
+
+source /etc/network/interfaces.d/*
+
+# The loopback network interface
+auto lo
+iface lo inet loopback
+
+# The primary network interface
+allow-hotplug ens192
+iface ens192 inet static
+ address '${host_ip}'
+ netmask 255.255.255.0
+ gateway 10.0.0.1
+ dns-nameservers 10.0.0.1
+
+allow-hotplug ens224
+iface ens224 inet dhcp
+
+# This is an autoconfigured IPv6 interface
+iface ens192 inet6 auto
+' > /etc/network/interfaces
 ```
 
 ## Reset python environment

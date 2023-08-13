@@ -71,9 +71,9 @@
       driver_options:
           parent: "{{ network_parent }}"
       ipam_config:
-          - gateway: "172.20.10.1"
-            subnet: "172.20.10.0/24"
-            iprange: "172.20.10.0/24"
+          - gateway: "10.0.0.1"
+            subnet: "10.0.0.0/24"
+            iprange: "10.0.0.0/24"
 
 - name: Loki block
   block:
@@ -158,7 +158,7 @@
       - name: Install grafana clock
         community.docker.docker_container_exec:
             container: grafana
-            command: grafana-cli plugins install grafana-clock-panel
+            command: grafana cli plugins install grafana-clock-panel
 
       - name: Restart grafana
         community.docker.docker_container:

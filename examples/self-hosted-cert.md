@@ -13,12 +13,12 @@ apt install -y curl
 ```sh
 macvlan_name="tocvlan"
 macvlan_parent="ens224"
-macvlan_subnet="172.20.10.0/24"
-macvlan_gateway="172.20.10.1"
+macvlan_subnet="10.0.0.0/24"
+macvlan_gateway="10.0.0.1"
 
 cert_path="/root/certbot_data"
-server_ip="172.20.10.225"
-cert_bot_ip="172.20.10.9"
+server_ip="10.0.0.20"
+cert_bot_ip="10.0.0.9"
 domain_name="trader.tocraw.com"
 ```
 

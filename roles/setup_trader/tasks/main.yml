@@ -1,251 +1,251 @@
 # code: language=ansible
 - name: Clear DNS cache
   ansible.builtin.systemd:
-      name: systemd-resolved.service
-      state: restarted
+    name: systemd-resolved.service
+    state: restarted
 
 - name: Check docker hub remaining pull limit
   block:
-      - name: Get temp docker token
-        ansible.builtin.uri:
-            url: https://auth.docker.io/token?service=registry.docker.io&scope=repository:ratelimitpreview/test:pull
-            user: "{{ docker_user }}"
-            password: "{{ docker_password }}"
-            method: GET
-            return_content: true
-        register: http_response
+    - name: Get temp docker token
+      ansible.builtin.uri:
+        url: https://auth.docker.io/token?service=registry.docker.io&scope=repository:ratelimitpreview/test:pull
+        user: "{{ docker_user }}"
+        password: "{{ docker_password }}"
+        method: GET
+        return_content: true
+      register: http_response
 
-      - name: Parse token
-        ansible.builtin.set_fact:
-            temp_docker_token: "{{ http_response.content | from_json | json_query('token') }}"
+    - name: Parse token
+      ansible.builtin.set_fact:
+        temp_docker_token: "{{ http_response.content | from_json | json_query('token') }}"
 
-      - name: Get remaining
-        ansible.builtin.uri:
-            url: https://registry-1.docker.io/v2/ratelimitpreview/test/manifests/latest
-            headers:
-                Authorization: "Bearer {{ temp_docker_token }}"
-            method: GET
-            return_content: true
-        register: http_response_remaining
+    - name: Get remaining
+      ansible.builtin.uri:
+        url: https://registry-1.docker.io/v2/ratelimitpreview/test/manifests/latest
+        headers:
+          Authorization: "Bearer {{ temp_docker_token }}"
+        method: GET
+        return_content: true
+      register: http_response_remaining
 
-      - name: Parse remaining
-        ansible.builtin.set_fact:
-            docker_remaining: "{{ http_response_remaining.ratelimit_remaining | split(';') }}"
+    - name: Parse remaining
+      ansible.builtin.set_fact:
+        docker_remaining: "{{ http_response_remaining.ratelimit_remaining | split(';') }}"
 
-      - name: Use docker hub
-        ansible.builtin.set_fact:
-            image_owner: "{{ docker_user }}"
-            use_registry: "docker"
-        when: docker_remaining[0] | int > 10
+    - name: Use docker hub
+      ansible.builtin.set_fact:
+        image_owner: "{{ docker_user }}"
+        use_registry: "docker"
+      when: docker_remaining[0] | int > 10
 
-      - name: Use github container registry
-        ansible.builtin.set_fact:
-            image_owner: ghcr.io/toc-taiwan
-            use_registry: "github"
-        when: docker_remaining[0] | int < 10
+    - name: Use github container registry
+      ansible.builtin.set_fact:
+        image_owner: ghcr.io/toc-taiwan
+        use_registry: "github"
+      when: docker_remaining[0] | int < 10
 
-      - name: Decide registry
-        ansible.builtin.debug:
-            msg: "Use {{ use_registry }}, remaining {{ docker_remaining[0] }}"
+    - name: Decide registry
+      ansible.builtin.debug:
+        msg: "Use {{ use_registry }}, remaining {{ docker_remaining[0] }}"
 
 - name: Login Github Container Registry
   community.docker.docker_login:
-      registry_url: ghcr.io
-      username: "{{ github_user }}"
-      password: "{{ github_token }}"
-      reauthorize: true
+    registry_url: ghcr.io
+    username: "{{ github_user }}"
+    password: "{{ github_token }}"
+    reauthorize: true
   when: use_registry == "github"
 
 - name: Login Docker Hub Container Registry
   community.docker.docker_login:
-      username: "{{ docker_user }}"
-      password: "{{ docker_token }}"
-      reauthorize: true
+    username: "{{ docker_user }}"
+    password: "{{ docker_token }}"
+    reauthorize: true
   when: use_registry == "docker"
 
 - name: Loki
   block:
-      - name: Install loki
-        community.docker.docker_plugin:
-            plugin_name: grafana/loki-docker-driver:latest
-            alias: loki
-            state: present
-      - name: Enable loki
-        community.docker.docker_plugin:
-            plugin_name: loki
-            state: enable
-      - name: Configure Docker
-        ansible.builtin.template:
-            src: loki.j2
-            dest: /etc/docker/daemon.json
-            mode: "644"
-      - name: Reload docker
-        ansible.builtin.systemd:
-            name: docker
-            state: restarted
+    - name: Install loki
+      community.docker.docker_plugin:
+        plugin_name: grafana/loki-docker-driver:latest
+        alias: loki
+        state: present
+    - name: Enable loki
+      community.docker.docker_plugin:
+        plugin_name: loki
+        state: enable
+    - name: Configure Docker
+      ansible.builtin.template:
+        src: loki.j2
+        dest: /etc/docker/daemon.json
+        mode: "644"
+    - name: Reload docker
+      ansible.builtin.systemd:
+        name: docker
+        state: restarted
 
 - name: Create macvlan
   community.docker.docker_network:
-      name: "{{ network_name }}"
-      state: present
-      driver: macvlan
-      driver_options:
-          parent: "{{ network_parent }}"
-      ipam_config:
-          - gateway: "172.20.10.1"
-            subnet: "172.20.10.0/24"
-            iprange: "172.20.10.0/24"
+    name: "{{ network_name }}"
+    state: present
+    driver: macvlan
+    driver_options:
+      parent: "{{ network_parent }}"
+    ipam_config:
+      - gateway: "10.0.0.1"
+        subnet: "10.0.0.0/24"
+        iprange: "10.0.0.0/24"
 
 - name: Start node exporter
   community.docker.docker_container:
-      name: node-exporter
-      image: bitnami/node-exporter:1.5.0
-      restart_policy: always
-      detach: true
-      pid_mode: host
-      volumes:
-          - /:/host:ro,rslave
-      command: --path.rootfs=/host
-      networks:
-          - name: "{{ network_name }}"
-            ipv4_address: "{{ ip_node_exporter }}"
+    name: node-exporter
+    image: bitnami/node-exporter:1.5.0
+    restart_policy: always
+    detach: true
+    pid_mode: host
+    volumes:
+      - /:/host:ro,rslave
+    command: --path.rootfs=/host
+    networks:
+      - name: "{{ network_name }}"
+        ipv4_address: "{{ ip_node_exporter }}"
 
 - name: Nginx
   block:
-      - name: Create config folder
-        ansible.builtin.file:
-            path: /root/ansible-config/nginx
-            state: directory
-            mode: "755"
-      - name: Configure Nginx
-        ansible.builtin.template:
-            src: nginx.conf.j2
-            dest: /root/ansible-config/nginx/nginx.conf
-            mode: "644"
-      - name: Start Nginx
-        community.docker.docker_container:
-            name: nginx
-            image: nginx:1.24.0
-            restart_policy: always
-            detach: true
-            volumes:
-                - /root/ansible-config/nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf:ro
-                - /root/certbot_data/www:/var/www/certbot/:ro
-                - /root/certbot_data/conf:/etc/nginx/ssl/:ro
-            networks:
-                - name: "{{ network_name }}"
-                  ipv4_address: "{{ ip_nginx }}"
+    - name: Create config folder
+      ansible.builtin.file:
+        path: /root/ansible-config/nginx
+        state: directory
+        mode: "755"
+    - name: Configure Nginx
+      ansible.builtin.template:
+        src: nginx.conf.j2
+        dest: /root/ansible-config/nginx/nginx.conf
+        mode: "644"
+    - name: Start Nginx
+      community.docker.docker_container:
+        name: nginx
+        image: nginx:1.24.0
+        restart_policy: always
+        detach: true
+        volumes:
+          - /root/ansible-config/nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf:ro
+          - /root/certbot_data/www:/var/www/certbot/:ro
+          - /root/certbot_data/conf:/etc/nginx/ssl/:ro
+        networks:
+          - name: "{{ network_name }}"
+            ipv4_address: "{{ ip_nginx }}"
 
 - name: Rabbitmq
   block:
-      - name: Start Rabbitmq
-        community.docker.docker_container:
-            name: toc-rabbitmq
-            image: rabbitmq:3.11.15-management
-            restart_policy: always
-            detach: true
-            env:
-                RABBITMQ_DEFAULT_USER: "{{ rabbitmq_user }}"
-                RABBITMQ_DEFAULT_PASS: "{{ rabbitmq_password }}"
-            networks:
-                - name: "{{ network_name }}"
-                  ipv4_address: "{{ ip_rabbitmq }}"
-      - name: Check if is listening
-        ansible.builtin.wait_for:
-            port: 15672
-            delay: 5
-            host: "{{ ip_rabbitmq }}"
-            timeout: 120
+    - name: Start Rabbitmq
+      community.docker.docker_container:
+        name: toc-rabbitmq
+        image: rabbitmq:3.11.15-management
+        restart_policy: always
+        detach: true
+        env:
+          RABBITMQ_DEFAULT_USER: "{{ rabbitmq_user }}"
+          RABBITMQ_DEFAULT_PASS: "{{ rabbitmq_password }}"
+        networks:
+          - name: "{{ network_name }}"
+            ipv4_address: "{{ ip_rabbitmq }}"
+    - name: Check if is listening
+      ansible.builtin.wait_for:
+        port: 15672
+        delay: 5
+        host: "{{ ip_rabbitmq }}"
+        timeout: 120
 
 - name: ToC Sinopac Python
   block:
-      - name: Create env folder
-        ansible.builtin.file:
-            path: /root/toc-sinopac-python-env
-            state: directory
-            mode: "755"
-      - name: Configure ToC Sinopac Python
-        ansible.builtin.template:
-            src: toc_sinopac_python.env.j2
-            dest: /root/toc-sinopac-python-env/.env
-            mode: "644"
-      - name: Start ToC Sinopac Python
-        community.docker.docker_container:
-            name: toc-sinopac-python
-            image: "{{ image_owner }}/toc-sinopac-python:latest"
-            restart_policy: always
-            detach: true
-            volumes:
-                - /root/toc-sinopac-python-logs:/toc-sinopac-python/logs
-                - /root/toc-sinopac-python-env/.env:/toc-sinopac-python/.env
-            env:
-                TZ: "Asia/Taipei"
-            networks:
-                - name: "{{ network_name }}"
-                  ipv4_address: "{{ ip_toc_sinopac_python }}"
+    - name: Create env folder
+      ansible.builtin.file:
+        path: /root/toc-sinopac-python-env
+        state: directory
+        mode: "755"
+    - name: Configure ToC Sinopac Python
+      ansible.builtin.template:
+        src: toc_sinopac_python.env.j2
+        dest: /root/toc-sinopac-python-env/.env
+        mode: "644"
+    - name: Start ToC Sinopac Python
+      community.docker.docker_container:
+        name: toc-sinopac-python
+        image: "{{ image_owner }}/toc-sinopac-python:latest"
+        restart_policy: always
+        detach: true
+        volumes:
+          - /root/toc-sinopac-python-logs:/toc-sinopac-python/logs
+          - /root/toc-sinopac-python-env/.env:/toc-sinopac-python/.env
+        env:
+          TZ: "Asia/Taipei"
+        networks:
+          - name: "{{ network_name }}"
+            ipv4_address: "{{ ip_toc_sinopac_python }}"
 
 - name: ToC Fugle Python
   block:
-      - name: Create env folder
-        ansible.builtin.file:
-            path: /root/toc-fugle-python-env
-            state: directory
-            mode: "755"
-      - name: Configure ToC Fugle Python
-        ansible.builtin.template:
-            src: toc_fugle_python.env.j2
-            dest: /root/toc-fugle-python-env/.env
-            mode: "644"
-      - name: Start ToC Fugle Python
-        community.docker.docker_container:
-            name: toc-fugle-python
-            image: "{{ image_owner }}/toc-fugle-python:latest"
-            restart_policy: always
-            detach: true
-            volumes:
-                - /root/toc-fugle-python-logs:/toc-fugle-python/logs
-                - /root/toc-fugle-python-env/.env:/toc-fugle-python/.env
-            env:
-                TZ: "Asia/Taipei"
-            networks:
-                - name: "{{ network_name }}"
-                  ipv4_address: "{{ ip_toc_fugle_python }}"
+    - name: Create env folder
+      ansible.builtin.file:
+        path: /root/toc-fugle-python-env
+        state: directory
+        mode: "755"
+    - name: Configure ToC Fugle Python
+      ansible.builtin.template:
+        src: toc_fugle_python.env.j2
+        dest: /root/toc-fugle-python-env/.env
+        mode: "644"
+    - name: Start ToC Fugle Python
+      community.docker.docker_container:
+        name: toc-fugle-python
+        image: "{{ image_owner }}/toc-fugle-python:latest"
+        restart_policy: always
+        detach: true
+        volumes:
+          - /root/toc-fugle-python-logs:/toc-fugle-python/logs
+          - /root/toc-fugle-python-env/.env:/toc-fugle-python/.env
+        env:
+          TZ: "Asia/Taipei"
+        networks:
+          - name: "{{ network_name }}"
+            ipv4_address: "{{ ip_toc_fugle_python }}"
 
 - name: ToC Machine Trading
   block:
-      - name: Create env folder
-        ansible.builtin.file:
-            path: /root/toc-machine-trading-env
-            state: directory
-            mode: "755"
-      - name: Create config folder
-        ansible.builtin.file:
-            path: /root/toc-machine-trading-configs
-            state: directory
-            mode: "755"
-      - name: Configure ToC Machine Trading Env
-        ansible.builtin.template:
-            src: toc_machine_trading.env.j2
-            dest: /root/toc-machine-trading-env/.env
-            mode: "644"
-      - name: Configure ToC Machine Trading Config
-        ansible.builtin.template:
-            src: toc_machine_trading.yml.j2
-            dest: /root/toc-machine-trading-configs/config.yml
-            mode: "644"
+    - name: Create env folder
+      ansible.builtin.file:
+        path: /root/toc-machine-trading-env
+        state: directory
+        mode: "755"
+    - name: Create config folder
+      ansible.builtin.file:
+        path: /root/toc-machine-trading-configs
+        state: directory
+        mode: "755"
+    - name: Configure ToC Machine Trading Env
+      ansible.builtin.template:
+        src: toc_machine_trading.env.j2
+        dest: /root/toc-machine-trading-env/.env
+        mode: "644"
+    - name: Configure ToC Machine Trading Config
+      ansible.builtin.template:
+        src: toc_machine_trading.yml.j2
+        dest: /root/toc-machine-trading-configs/config.yml
+        mode: "644"
 
-      - name: Start ToC Machine Trading
-        community.docker.docker_container:
-            name: toc-machine-trading
-            image: "{{ image_owner }}/toc-machine-trading:latest"
-            restart_policy: always
-            detach: true
-            volumes:
-                - /root/toc-machine-trading-logs:/toc-machine-trading/logs
-                - /root/toc-machine-trading-env/.env:/toc-machine-trading/.env
-                - /root/toc-machine-trading-configs/config.yml:/toc-machine-trading/configs/config.yml
-            env:
-                TZ: "Asia/Taipei"
-            networks:
-                - name: "{{ network_name }}"
-                  ipv4_address: "{{ ip_toc_machine_trading }}"
+    - name: Start ToC Machine Trading
+      community.docker.docker_container:
+        name: toc-machine-trading
+        image: "{{ image_owner }}/toc-machine-trading:latest"
+        restart_policy: always
+        detach: true
+        volumes:
+          - /root/toc-machine-trading-logs:/toc-machine-trading/logs
+          - /root/toc-machine-trading-env/.env:/toc-machine-trading/.env
+          - /root/toc-machine-trading-configs/config.yml:/toc-machine-trading/configs/config.yml
+        env:
+          TZ: "Asia/Taipei"
+        networks:
+          - name: "{{ network_name }}"
+            ipv4_address: "{{ ip_toc_machine_trading }}"
