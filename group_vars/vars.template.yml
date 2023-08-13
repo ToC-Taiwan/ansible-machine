@@ -4,16 +4,17 @@ network_parent:
 rabbitmq_user:
 rabbitmq_password:
 
-ip_postgres:
-ip_node_exporter:
-ip_grafana:
-ip_loki:
-ip_prometheus:
-ip_nginx:
-ip_rabbitmq:
-ip_toc_sinopac_python:
-ip_toc_machine_trading:
-ip_toc_fugle_python:
+ip_center_postgres:
+ip_center_grafana:
+ip_center_loki:
+ip_center_prometheus:
+
+ip_trader_nginx:
+ip_trader_node_exporter:
+ip_trader_rabbitmq:
+ip_trader_toc_sinopac_python:
+ip_trader_toc_machine_trading:
+ip_trader_toc_fugle_python:
 
 default_db:
 db_user:

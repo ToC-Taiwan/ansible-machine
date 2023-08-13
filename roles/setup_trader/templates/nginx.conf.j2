@@ -21,7 +21,7 @@ server {
     client_max_body_size 30m;
 
     location ~ /tmt {
-        proxy_pass http://{{ ip_toc_machine_trading }}:26670;
+        proxy_pass http://{{ ip_trader_toc_machine_trading }}:26670;
         proxy_http_version 1.1;
         proxy_cache_bypass $http_upgrade;
         proxy_set_header Upgrade $http_upgrade;

@@ -108,7 +108,7 @@
     command: --path.rootfs=/host
     networks:
       - name: "{{ network_name }}"
-        ipv4_address: "{{ ip_node_exporter }}"
+        ipv4_address: "{{ ip_trader_node_exporter }}"
 
 - name: Nginx
   block:
@@ -134,7 +134,7 @@
           - /root/certbot_data/conf:/etc/nginx/ssl/:ro
         networks:
           - name: "{{ network_name }}"
-            ipv4_address: "{{ ip_nginx }}"
+            ipv4_address: "{{ ip_trader_nginx }}"
 
 - name: Rabbitmq
   block:
@@ -149,12 +149,12 @@
           RABBITMQ_DEFAULT_PASS: "{{ rabbitmq_password }}"
         networks:
           - name: "{{ network_name }}"
-            ipv4_address: "{{ ip_rabbitmq }}"
+            ipv4_address: "{{ ip_trader_rabbitmq }}"
     - name: Check if is listening
       ansible.builtin.wait_for:
         port: 15672
         delay: 5
-        host: "{{ ip_rabbitmq }}"
+        host: "{{ ip_trader_rabbitmq }}"
         timeout: 120
 
 - name: ToC Sinopac Python
@@ -182,7 +182,7 @@
           TZ: "Asia/Taipei"
         networks:
           - name: "{{ network_name }}"
-            ipv4_address: "{{ ip_toc_sinopac_python }}"
+            ipv4_address: "{{ ip_trader_toc_sinopac_python }}"
 
 - name: ToC Fugle Python
   block:
@@ -209,7 +209,7 @@
           TZ: "Asia/Taipei"
         networks:
           - name: "{{ network_name }}"
-            ipv4_address: "{{ ip_toc_fugle_python }}"
+            ipv4_address: "{{ ip_trader_toc_fugle_python }}"
 
 - name: ToC Machine Trading
   block:
@@ -248,4 +248,4 @@
           TZ: "Asia/Taipei"
         networks:
           - name: "{{ network_name }}"
-            ipv4_address: "{{ ip_toc_machine_trading }}"
+            ipv4_address: "{{ ip_trader_toc_machine_trading }}"

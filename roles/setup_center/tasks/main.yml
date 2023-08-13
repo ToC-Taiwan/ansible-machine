@@ -1,272 +1,272 @@
 # code: language=ansible
 - name: Clear dns cache
   ansible.builtin.systemd:
-      name: systemd-resolved.service
-      state: restarted
+    name: systemd-resolved.service
+    state: restarted
 
 - name: Check docker hub remaining pull limit
   block:
-      - name: Get temp docker token
-        ansible.builtin.uri:
-            url: https://auth.docker.io/token?service=registry.docker.io&scope=repository:ratelimitpreview/test:pull
-            user: "{{ docker_user }}"
-            password: "{{ docker_password }}"
-            method: GET
-            return_content: true
-        register: http_response
+    - name: Get temp docker token
+      ansible.builtin.uri:
+        url: https://auth.docker.io/token?service=registry.docker.io&scope=repository:ratelimitpreview/test:pull
+        user: "{{ docker_user }}"
+        password: "{{ docker_password }}"
+        method: GET
+        return_content: true
+      register: http_response
 
-      - name: Parse token
-        ansible.builtin.set_fact:
-            temp_docker_token: "{{ http_response.content | from_json | json_query('token') }}"
+    - name: Parse token
+      ansible.builtin.set_fact:
+        temp_docker_token: "{{ http_response.content | from_json | json_query('token') }}"
 
-      - name: Get remaining
-        ansible.builtin.uri:
-            url: https://registry-1.docker.io/v2/ratelimitpreview/test/manifests/latest
-            headers:
-                Authorization: "Bearer {{ temp_docker_token }}"
-            method: GET
-            return_content: true
-        register: http_response_remaining
+    - name: Get remaining
+      ansible.builtin.uri:
+        url: https://registry-1.docker.io/v2/ratelimitpreview/test/manifests/latest
+        headers:
+          Authorization: "Bearer {{ temp_docker_token }}"
+        method: GET
+        return_content: true
+      register: http_response_remaining
 
-      - name: Parse remaining
-        ansible.builtin.set_fact:
-            docker_remaining: "{{ http_response_remaining.ratelimit_remaining | split(';') }}"
+    - name: Parse remaining
+      ansible.builtin.set_fact:
+        docker_remaining: "{{ http_response_remaining.ratelimit_remaining | split(';') }}"
 
-      - name: Use docker hub
-        ansible.builtin.set_fact:
-            image_owner: "{{ docker_user }}"
-            use_registry: "docker"
-        when: docker_remaining[0] | int > 10
+    - name: Use docker hub
+      ansible.builtin.set_fact:
+        image_owner: "{{ docker_user }}"
+        use_registry: "docker"
+      when: docker_remaining[0] | int > 10
 
-      - name: Use github container registry
-        ansible.builtin.set_fact:
-            image_owner: ghcr.io/toc-taiwan
-            use_registry: "github"
-        when: docker_remaining[0] | int < 10
+    - name: Use github container registry
+      ansible.builtin.set_fact:
+        image_owner: ghcr.io/toc-taiwan
+        use_registry: "github"
+      when: docker_remaining[0] | int < 10
 
-      - name: Decide registry
-        ansible.builtin.debug:
-            msg: "Use {{ use_registry }}, remaining {{ docker_remaining[0] }}"
+    - name: Decide registry
+      ansible.builtin.debug:
+        msg: "Use {{ use_registry }}, remaining {{ docker_remaining[0] }}"
 
 - name: Login Github Container Registry
   community.docker.docker_login:
-      registry_url: ghcr.io
-      username: "{{ github_user }}"
-      password: "{{ github_token }}"
-      reauthorize: true
+    registry_url: ghcr.io
+    username: "{{ github_user }}"
+    password: "{{ github_token }}"
+    reauthorize: true
   when: use_registry == "github"
 
 - name: Login Docker Hub Container Registry
   community.docker.docker_login:
-      username: "{{ docker_user }}"
-      password: "{{ docker_token }}"
-      reauthorize: true
+    username: "{{ docker_user }}"
+    password: "{{ docker_token }}"
+    reauthorize: true
   when: use_registry == "docker"
 
 - name: Create macvlan
   community.docker.docker_network:
-      name: "{{ network_name }}"
-      state: present
-      driver: macvlan
-      driver_options:
-          parent: "{{ network_parent }}"
-      ipam_config:
-          - gateway: "10.0.0.1"
-            subnet: "10.0.0.0/24"
-            iprange: "10.0.0.0/24"
+    name: "{{ network_name }}"
+    state: present
+    driver: macvlan
+    driver_options:
+      parent: "{{ network_parent }}"
+    ipam_config:
+      - gateway: "10.0.0.1"
+        subnet: "10.0.0.0/24"
+        iprange: "10.0.0.0/24"
 
 - name: Loki block
   block:
-      - name: Create loki config folder
-        ansible.builtin.file:
-            path: /root/loki-config
-            state: directory
-            mode: "755"
+    - name: Create loki config folder
+      ansible.builtin.file:
+        path: /root/loki-config
+        state: directory
+        mode: "755"
 
-      - name: Configure loki
-        ansible.builtin.template:
-            src: loki.j2
-            dest: /root/loki-config/loki.yaml
-            mode: "644"
+    - name: Configure loki
+      ansible.builtin.template:
+        src: loki.j2
+        dest: /root/loki-config/loki.yaml
+        mode: "644"
 
-      - name: Start loki
-        community.docker.docker_container:
-            name: loki
-            image: grafana/loki:2.8.2
-            restart_policy: always
-            detach: true
-            volumes:
-                - /root/loki-config/loki.yaml:/etc/loki/local-config.yaml:ro
-            networks:
-                - name: "{{ network_name }}"
-                  ipv4_address: "{{ ip_loki }}"
+    - name: Start loki
+      community.docker.docker_container:
+        name: loki
+        image: grafana/loki:2.8.2
+        restart_policy: always
+        detach: true
+        volumes:
+          - /root/loki-config/loki.yaml:/etc/loki/local-config.yaml:ro
+        networks:
+          - name: "{{ network_name }}"
+            ipv4_address: "{{ ip_center_loki }}"
 
-      - name: Check if loki is listening
-        ansible.builtin.wait_for:
-            port: 3100
-            delay: 5
-            host: "{{ ip_loki }}"
-            timeout: 120
+    - name: Check if loki is listening
+      ansible.builtin.wait_for:
+        port: 3100
+        delay: 5
+        host: "{{ ip_center_loki }}"
+        timeout: 120
 
 - name: Prometheus block
   block:
-      - name: Create prometheus config folder
-        ansible.builtin.file:
-            path: /root/prometheus-config
-            state: directory
-            mode: "755"
+    - name: Create prometheus config folder
+      ansible.builtin.file:
+        path: /root/prometheus-config
+        state: directory
+        mode: "755"
 
-      - name: Configure prometheus
-        ansible.builtin.template:
-            src: prometheus.j2
-            dest: /root/prometheus-config/prometheus.yml
-            mode: "644"
+    - name: Configure prometheus
+      ansible.builtin.template:
+        src: prometheus.j2
+        dest: /root/prometheus-config/prometheus.yml
+        mode: "644"
 
-      - name: Start prometheus
-        community.docker.docker_container:
-            name: prometheus
-            image: prom/prometheus:v2.45.0
-            restart_policy: always
-            detach: true
-            volumes:
-                - /root/prometheus-config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
-            networks:
-                - name: "{{ network_name }}"
-                  ipv4_address: "{{ ip_prometheus }}"
+    - name: Start prometheus
+      community.docker.docker_container:
+        name: prometheus
+        image: prom/prometheus:v2.45.0
+        restart_policy: always
+        detach: true
+        volumes:
+          - /root/prometheus-config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+        networks:
+          - name: "{{ network_name }}"
+            ipv4_address: "{{ ip_center_prometheus }}"
 
-      - name: Check if prometheus is listening
-        ansible.builtin.wait_for:
-            port: 9090
-            delay: 5
-            host: "{{ ip_prometheus }}"
-            timeout: 120
+    - name: Check if prometheus is listening
+      ansible.builtin.wait_for:
+        port: 9090
+        delay: 5
+        host: "{{ ip_center_prometheus }}"
+        timeout: 120
 
 - name: Grafana block
   block:
-      - name: Start grafana
-        community.docker.docker_container:
-            name: grafana
-            image: grafana/grafana:10.0.1
-            restart_policy: always
-            detach: true
-            env:
-                TZ: "Asia/Taipei"
-            networks:
-                - name: "{{ network_name }}"
-                  ipv4_address: "{{ ip_grafana }}"
+    - name: Start grafana
+      community.docker.docker_container:
+        name: grafana
+        image: grafana/grafana:10.0.1
+        restart_policy: always
+        detach: true
+        env:
+          TZ: "Asia/Taipei"
+        networks:
+          - name: "{{ network_name }}"
+            ipv4_address: "{{ ip_center_grafana }}"
 
-      - name: Install grafana clock
-        community.docker.docker_container_exec:
-            container: grafana
-            command: grafana cli plugins install grafana-clock-panel
+    - name: Install grafana clock
+      community.docker.docker_container_exec:
+        container: grafana
+        command: grafana cli plugins install grafana-clock-panel
 
-      - name: Restart grafana
-        community.docker.docker_container:
-            name: grafana
-            restart: true
+    - name: Restart grafana
+      community.docker.docker_container:
+        name: grafana
+        restart: true
 
-      - name: Check if grafana is listening
-        ansible.builtin.wait_for:
-            port: 3000
-            delay: 5
-            host: "{{ ip_grafana }}"
-            timeout: 120
+    - name: Check if grafana is listening
+      ansible.builtin.wait_for:
+        port: 3000
+        delay: 5
+        host: "{{ ip_center_grafana }}"
+        timeout: 120
 
-      - name: Install prometheus datasource
-        community.grafana.grafana_datasource:
-            name: Prometheus
-            grafana_url: http://{{ ip_grafana }}:3000
-            grafana_user: admin
-            grafana_password: admin
-            ds_type: prometheus
-            ds_url: http://{{ ip_prometheus }}:9090
-            tls_skip_verify: true
+    - name: Install prometheus datasource
+      community.grafana.grafana_datasource:
+        name: Prometheus
+        grafana_url: http://{{ ip_center_grafana }}:3000
+        grafana_user: admin
+        grafana_password: admin
+        ds_type: prometheus
+        ds_url: http://{{ ip_center_prometheus }}:9090
+        tls_skip_verify: true
 
-      - name: Install loki datasource
-        community.grafana.grafana_datasource:
-            name: Loki
-            grafana_url: http://{{ ip_grafana }}:3000
-            grafana_user: admin
-            grafana_password: admin
-            ds_type: loki
-            ds_url: http://{{ ip_loki }}:3100
-            tls_skip_verify: true
+    - name: Install loki datasource
+      community.grafana.grafana_datasource:
+        name: Loki
+        grafana_url: http://{{ ip_center_grafana }}:3000
+        grafana_user: admin
+        grafana_password: admin
+        ds_type: loki
+        ds_url: http://{{ ip_center_loki }}:3100
+        tls_skip_verify: true
 
-      - name: Get datasources
-        ansible.builtin.uri:
-            url: http://{{ ip_grafana }}:3000/api/datasources
-            headers:
-                Authorization: Basic YWRtaW46YWRtaW4=
-            method: GET
-            return_content: true
-        register: http_response
+    - name: Get datasources
+      ansible.builtin.uri:
+        url: http://{{ ip_center_grafana }}:3000/api/datasources
+        headers:
+          Authorization: Basic YWRtaW46YWRtaW4=
+        method: GET
+        return_content: true
+      register: http_response
 
-      - name: Parse datasources response for prometheus
-        ansible.builtin.set_fact:
-            prometheus_id: "{{ item.uid }}"
-        loop: "{{ http_response.content | from_json }}"
-        when: item.name == "Prometheus"
+    - name: Parse datasources response for prometheus
+      ansible.builtin.set_fact:
+        prometheus_id: "{{ item.uid }}"
+      loop: "{{ http_response.content | from_json }}"
+      when: item.name == "Prometheus"
 
-      - name: Parse datasources response for loki
-        ansible.builtin.set_fact:
-            loki_id: "{{ item.uid }}"
-        loop: "{{ http_response.content | from_json }}"
-        when: item.name == "Loki"
+    - name: Parse datasources response for loki
+      ansible.builtin.set_fact:
+        loki_id: "{{ item.uid }}"
+      loop: "{{ http_response.content | from_json }}"
+      when: item.name == "Loki"
 
-      - name: Create grafana config folder
-        ansible.builtin.file:
-            path: /root/grafana-config
-            state: directory
-            mode: "755"
+    - name: Create grafana config folder
+      ansible.builtin.file:
+        path: /root/grafana-config
+        state: directory
+        mode: "755"
 
-      - name: Configure grafana dashboard
-        ansible.builtin.template:
-            src: dashboard.j2
-            dest: /root/grafana-config/dashboard.json
-            mode: "644"
+    - name: Configure grafana dashboard
+      ansible.builtin.template:
+        src: dashboard.j2
+        dest: /root/grafana-config/dashboard.json
+        mode: "644"
 
-      - name: Read grafana config file
-        ansible.builtin.slurp:
-            src: /root/grafana-config/dashboard.json
-        register: dashboard
+    - name: Read grafana config file
+      ansible.builtin.slurp:
+        src: /root/grafana-config/dashboard.json
+      register: dashboard
 
-      - name: Import grafana dashboard
-        ansible.builtin.uri:
-            url: http://{{ ip_grafana }}:3000/api/dashboards/db
-            headers:
-                Authorization: Basic YWRtaW46YWRtaW4=
-            method: POST
-            body: "{{ dashboard['content'] | b64decode }}"
-            body_format: json
-            return_content: true
-        register: http_response
+    - name: Import grafana dashboard
+      ansible.builtin.uri:
+        url: http://{{ ip_center_grafana }}:3000/api/dashboards/db
+        headers:
+          Authorization: Basic YWRtaW46YWRtaW4=
+        method: POST
+        body: "{{ dashboard['content'] | b64decode }}"
+        body_format: json
+        return_content: true
+      register: http_response
 
 - name: Postgres block
   block:
-      - name: Delete postgres data folder
-        ansible.builtin.file:
-            path: /data/database/postgres
-            state: absent
+    - name: Delete postgres data folder
+      ansible.builtin.file:
+        path: /data/database/postgres
+        state: absent
 
-      - name: Create postgres data folder
-        ansible.builtin.file:
-            path: /data/database/postgres
-            state: directory
-            mode: "755"
+    - name: Create postgres data folder
+      ansible.builtin.file:
+        path: /data/database/postgres
+        state: directory
+        mode: "755"
 
-      - name: Start postgres
-        community.docker.docker_container:
-            name: postgres
-            image: postgres:15.3
-            restart_policy: always
-            detach: true
-            env:
-                POSTGRES_DB: "{{ default_db }}"
-                POSTGRES_USER: "{{ db_user }}"
-                POSTGRES_PASSWORD: "{{ db_password }}"
-                TZ: "Asia/Taipei"
-            volumes:
-                - /data/database/postgres:/var/lib/postgresql/data
-            networks:
-                - name: "{{ network_name }}"
-                  ipv4_address: "{{ ip_postgres }}"
+    - name: Start postgres
+      community.docker.docker_container:
+        name: postgres
+        image: postgres:15.3
+        restart_policy: always
+        detach: true
+        env:
+          POSTGRES_DB: "{{ default_db }}"
+          POSTGRES_USER: "{{ db_user }}"
+          POSTGRES_PASSWORD: "{{ db_password }}"
+          TZ: "Asia/Taipei"
+        volumes:
+          - /data/database/postgres:/var/lib/postgresql/data
+        networks:
+          - name: "{{ network_name }}"
+            ipv4_address: "{{ ip_center_postgres }}"
