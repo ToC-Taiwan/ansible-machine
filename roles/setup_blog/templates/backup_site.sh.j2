@@ -1,0 +1,25 @@
+#!/bin/bash
+
+now=$(date +"%Y%m%d_%H%M")
+
+docker container stop wordpress
+docker container stop nginx
+
+mkdir -p /root/wordpress_backup
+
+mkdir tmp
+cp -r /root/wordpress_data ./tmp
+# cp -r /root/nginx_data ./tmp
+cp -r /root/certbot_data ./tmp
+
+mysqldump -h {{ ip_blog_mariadb }} -u root -pasdf0000 wordpress >./tmp/wordpress_db_$now.sql
+
+tar -czvf $now.tar.gz ./tmp/*
+
+mv $now.tar.gz /root/wordpress_backup
+chmod 777 /root/wordpress_backup/$now.tar.gz
+find /root/wordpress_backup -name "*.gz" -type f -mtime +14 -delete
+rm -rf ./tmp
+
+docker container restart wordpress
+docker container restart nginx

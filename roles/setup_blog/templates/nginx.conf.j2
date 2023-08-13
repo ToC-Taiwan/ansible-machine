@@ -1,7 +1,7 @@
 server {
     listen 80 default_server;
     listen [::]:80 default_server;
-    server_name trader.tocraw.com;
+    server_name blog.tocandraw.com;
 
     location /.well-known/acme-challenge/ {
         root /var/www/certbot;
@@ -20,12 +20,12 @@ map $http_upgrade $connection_upgrade {
 server {
     listen 443 ssl http2;
     listen [::]:443 ssl http2;
-    server_name trader.tocraw.com;
+    server_name blog.tocandraw.com;
 
     client_max_body_size 30m;
 
-    location ~ /tmt {
-        proxy_pass http://{{ ip_trader_toc_machine_trading }}:26670;
+    location / {
+        proxy_pass http://{{ ip_blog_wordpress }};
         proxy_http_version 1.1;
         proxy_cache_bypass $http_upgrade;
         proxy_set_header Upgrade $http_upgrade;
@@ -40,19 +40,19 @@ server {
         proxy_redirect off;
     }
 
-    ssl_certificate /etc/nginx/ssl/live/trader.tocraw.com/fullchain.pem;
-    ssl_certificate_key /etc/nginx/ssl/live/trader.tocraw.com/privkey.pem;
+    ssl_certificate /etc/nginx/ssl/live/blog.tocandraw.com/fullchain.pem;
+    ssl_certificate_key /etc/nginx/ssl/live/blog.tocandraw.com/privkey.pem;
     ssl_session_timeout 1d;
     ssl_session_cache shared:MozSSL:10m; # about 40000 sessions
     ssl_session_tickets off;
 
-    ssl_dhparam /etc/nginx/ssl/live/trader.tocraw.com/dhparam;
+    ssl_dhparam /etc/nginx/ssl/live/blog.tocandraw.com/dhparam;
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:DHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384;
     ssl_prefer_server_ciphers off;
     add_header Strict-Transport-Security "max-age=63072000" always;
     ssl_stapling on;
     ssl_stapling_verify on;
-    ssl_trusted_certificate /etc/nginx/ssl/live/trader.tocraw.com/chain.pem;
+    ssl_trusted_certificate /etc/nginx/ssl/live/blog.tocandraw.com/chain.pem;
     resolver 8.8.8.8;
 }

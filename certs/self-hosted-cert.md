@@ -15,11 +15,24 @@ macvlan_name="tocvlan"
 macvlan_parent="ens224"
 macvlan_subnet="10.0.0.0/24"
 macvlan_gateway="10.0.0.1"
+```
 
+- trader
+
+```sh
 cert_path="/root/certbot_data"
 server_ip="10.0.0.20"
 cert_bot_ip="10.0.0.9"
 domain_name="trader.tocraw.com"
+```
+
+- blog
+
+```sh
+cert_path="/root/certbot_data"
+server_ip="10.0.0.10"
+cert_bot_ip="10.0.0.9"
+domain_name="blog.tocandraw.com"
 ```
 
 - new cert

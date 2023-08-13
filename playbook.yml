@@ -48,3 +48,10 @@
   hosts: center
   roles:
     - reset_center
+
+- name: Center Setup
+  tags: setup_blog
+  vars_files: group_vars/vars.yml
+  hosts: blog
+  roles:
+    - setup_blog

@@ -29,3 +29,7 @@ reset_db: ### reset_db
 setup_center: ### setup_center
 	@ansible-playbook -i inventory playbook.yml --tags setup_center
 .PHONY: setup_center
+
+setup_blog: ### setup_blog
+	@ansible-playbook -i inventory playbook.yml --tags setup_blog
+.PHONY: setup_blog

@@ -1,0 +1,216 @@
+# code: language=ansible
+- name: Clear DNS cache
+  ansible.builtin.systemd:
+      name: systemd-resolved.service
+      state: restarted
+
+- name: Remove nginx
+  community.docker.docker_container:
+      name: nginx
+      state: absent
+
+- name: Remove wordpress
+  community.docker.docker_container:
+      name: wordpress
+      state: absent
+
+- name: Remove mariadb
+  community.docker.docker_container:
+      name: mariadb
+      state: absent
+
+- name: Prune everything (including non-dangling images)
+  community.docker.docker_prune:
+      containers: true
+      images: true
+      images_filters:
+          dangling: false
+      networks: true
+      volumes: true
+      builder_cache: true
+
+- name: Create macvlan
+  community.docker.docker_network:
+      name: "{{ network_name }}"
+      state: present
+      driver: macvlan
+      driver_options:
+          parent: "{{ network_parent }}"
+      ipam_config:
+          - gateway: "10.0.0.1"
+            subnet: "10.0.0.0/24"
+            iprange: "10.0.0.0/24"
+
+- name: Remove backup job
+  ansible.builtin.lineinfile:
+      path: /etc/crontab
+      state: absent
+      regexp: "/backup_site.sh"
+
+- name: Configure backup script
+  ansible.builtin.template:
+      src: backup_site.sh.j2
+      dest: /root/backup_site.sh
+      mode: "755"
+
+- name: Add backup job
+  ansible.builtin.shell: echo "0 4 * * * root /root/backup_site.sh" >> /etc/crontab
+  register: my_output
+  changed_when: my_output.rc != 0
+
+- name: Get files in a folder
+  ansible.builtin.find:
+      paths: "/root/wordpress_backup"
+  register: found_files
+
+- name: Get latest file
+  ansible.builtin.set_fact:
+      latest_file: "{{ found_files.files | sort(attribute='mtime', reverse=true) | first }}"
+
+- name: Show latest file
+  ansible.builtin.debug:
+      msg: "{{ latest_file.path }}"
+
+- name: Delete tmp folder
+  ansible.builtin.file:
+      path: /root/tmp
+      state: absent
+
+- name: Extract backup file into tmp folder
+  ansible.builtin.unarchive:
+      src: "{{ latest_file.path }}"
+      dest: /root/
+      remote_src: true
+
+- name: Copy file with owner and permissions
+  ansible.builtin.copy:
+      src: /root/tmp/wordpress_data
+      dest: /root/
+      owner: www-data
+      group: www-data
+      mode: "preserve"
+      remote_src: true
+
+- name: Configure wordpress
+  ansible.builtin.template:
+      src: wordpress.ini.j2
+      dest: /root/wordpress_data/wordpress.ini
+      mode: "644"
+
+- name: Start mariadb
+  community.docker.docker_container:
+      name: mariadb
+      image: mariadb:latest
+      restart_policy: always
+      detach: true
+      env:
+          MARIADB_ROOT_PASSWORD: "asdf0000"
+          MARIADB_ROOT_HOST: "%"
+          TZ: "Asia/Taipei"
+      networks:
+          - name: "{{ network_name }}"
+            ipv4_address: "{{ ip_blog_mariadb }}"
+
+- name: Check if is listening
+  ansible.builtin.wait_for:
+      port: 3306
+      delay: 5
+      host: "{{ ip_blog_mariadb }}"
+      timeout: 120
+
+- name: Make sure pymysql is installed
+  ansible.builtin.pip:
+      name: pymysql
+      state: present
+
+- name: Drop database with name 'wordpress'
+  community.mysql.mysql_db:
+      name: wordpress
+      state: absent
+      login_user: root
+      login_password: asdf0000
+      login_host: "{{ ip_blog_mariadb }}"
+
+- name: Create database with name 'wordpress'
+  community.mysql.mysql_db:
+      name: wordpress
+      state: present
+      login_user: root
+      login_password: asdf0000
+      login_host: "{{ ip_blog_mariadb }}"
+      encoding: utf8mb4
+      collation: utf8mb4_general_ci
+
+- name: Restore database
+  community.mysql.mysql_db:
+      name: wordpress
+      state: import
+      login_user: root
+      login_password: asdf0000
+      login_host: "{{ ip_blog_mariadb }}"
+      target: "/root/tmp/wordpress_db_{{ latest_file.path | basename | regex_replace('\\.tar.gz', '') }}.sql"
+
+- name: Start wordpress
+  community.docker.docker_container:
+      name: wordpress
+      image: wordpress:latest
+      restart_policy: always
+      detach: true
+      env:
+          WORDPRESS_DB_HOST: "{{ ip_blog_mariadb }}"
+          WORDPRESS_DB_USER: "root"
+          WORDPRESS_DB_PASSWORD: "asdf0000"
+          WORDPRESS_DB_NAME: "wordpress"
+          WORDPRESS_TABLE_PREFIX: "wp_"
+          TZ: "Asia/Taipei"
+      volumes:
+          - /root/wordpress_data:/var/www/html
+          - /root/wordpress_data/wordpress.ini:/usr/local/etc/php/conf.d/wordpress.ini
+      networks:
+          - name: "{{ network_name }}"
+            ipv4_address: "{{ ip_blog_wordpress }}"
+
+- name: Check if is listening
+  ansible.builtin.wait_for:
+      port: 80
+      delay: 5
+      host: "{{ ip_blog_wordpress }}"
+      timeout: 120
+
+- name: Nginx
+  block:
+      - name: Create config folder
+        ansible.builtin.file:
+            path: /root/ansible-config/nginx
+            state: directory
+            mode: "755"
+      - name: Configure Nginx
+        ansible.builtin.template:
+            src: nginx.conf.j2
+            dest: /root/ansible-config/nginx/nginx.conf
+            mode: "644"
+      - name: Start Nginx
+        community.docker.docker_container:
+            name: nginx
+            image: nginx:latest
+            restart_policy: always
+            detach: true
+            volumes:
+                - /root/ansible-config/nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf:ro
+                - /root/certbot_data/www:/var/www/certbot/:ro
+                - /root/certbot_data/conf:/etc/nginx/ssl/:ro
+            networks:
+                - name: "{{ network_name }}"
+                  ipv4_address: "{{ ip_blog_nginx }}"
+
+- name: Check if is listening
+  ansible.builtin.wait_for:
+      port: 443
+      delay: 5
+      host: "{{ ip_blog_nginx }}"
+      timeout: 120
+
+- name: Delete tmp folder
+  ansible.builtin.file:
+      path: /root/tmp
+      state: absent
