@@ -94,7 +94,7 @@
 - name: Start node exporter
   community.docker.docker_container:
     name: node-exporter
-    image: bitnami/node-exporter:1.5.0
+    image: bitnami/node-exporter:1.6.1
     restart_policy: always
     detach: true
     pid_mode: host
@@ -120,7 +120,7 @@
     - name: Start Nginx
       community.docker.docker_container:
         name: nginx
-        image: nginx:1.24.0
+        image: nginx:1.25.2
         restart_policy: always
         detach: true
         volumes:
@@ -136,7 +136,7 @@
     - name: Start Rabbitmq
       community.docker.docker_container:
         name: toc-rabbitmq
-        image: rabbitmq:3.11.15-management
+        image: rabbitmq:3.12.3-management
         restart_policy: always
         detach: true
         env:

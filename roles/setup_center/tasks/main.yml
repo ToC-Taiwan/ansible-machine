@@ -87,7 +87,7 @@
     - name: Start loki
       community.docker.docker_container:
         name: loki
-        image: grafana/loki:2.8.2
+        image: grafana/loki:2.8.4
         restart_policy: always
         detach: true
         volumes:
@@ -120,7 +120,7 @@
     - name: Start prometheus
       community.docker.docker_container:
         name: prometheus
-        image: prom/prometheus:v2.45.0
+        image: prom/prometheus:v2.46.0
         restart_policy: always
         detach: true
         volumes:
@@ -141,7 +141,7 @@
     - name: Start grafana
       community.docker.docker_container:
         name: grafana
-        image: grafana/grafana:10.0.1
+        image: grafana/grafana:10.1.0
         restart_policy: always
         detach: true
         env:
@@ -252,7 +252,7 @@
     - name: Start postgres
       community.docker.docker_container:
         name: postgres
-        image: postgres:15.3
+        image: postgres:15.4
         restart_policy: always
         detach: true
         env:
