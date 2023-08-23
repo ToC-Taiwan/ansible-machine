@@ -1,9 +1,4 @@
 # code: language=ansible
-- name: Clear DNS cache
-  ansible.builtin.systemd:
-      name: systemd-resolved.service
-      state: restarted
-
 - name: Remove nginx
   community.docker.docker_container:
       name: nginx
@@ -97,7 +92,17 @@
       dest: /root/wordpress_data/wordpress.ini
       mode: "644"
 
-- name: Start mariadb
+- name: Install mariadb-server
+  ansible.builtin.apt:
+      name: mariadb-server
+      update_cache: true
+
+- name: Disable mariadb
+  ansible.builtin.systemd:
+      name: mysql
+      enabled: false
+
+- name: Start mariadb container
   community.docker.docker_container:
       name: mariadb
       image: mariadb:latest
@@ -122,6 +127,7 @@
   ansible.builtin.pip:
       name: pymysql
       state: present
+      extra_args: "--break-system-packages"
 
 - name: Drop database with name 'wordpress'
   community.mysql.mysql_db:

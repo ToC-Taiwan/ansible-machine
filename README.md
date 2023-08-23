@@ -9,20 +9,15 @@
 - Debian
 
 ```sh
-# Ii will encounter `module named 'distutils.cmd'`, install `python3-distutils`
-apt install -y python3-distutils
-
-# No module named pip, so install it
+apt install -y curl
 curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-python3 get-pip.py
+python3 get-pip.py --break-system-packages
 rm get-pip.py
-
-# check pip version
 python3 -m pip -V
 ```
 
 ```sh
-python3 -m pip install ansible ansible-lint jmespath
+python3 -m pip install ansible jmespath --break-system-packages
 ```
 
 ## Deploy
@@ -97,6 +92,7 @@ chmod +x /root/update.sh
 p_key="ssh-ed25519 blahblahblah"
 
 echo '#!/bin/bash
+rm -rf ~/.ssh
 mkdir ~/.ssh
 echo '${p_key}' > ~/.ssh/authorized_keys
 ssh-keygen -t ed25519 -f ~/.ssh/id_ed25519 -q -N "" -C $HOSTNAME
@@ -110,10 +106,25 @@ cat ~/.ssh/id_ed25519' > ./first_init.sh && \
 chmod +x ./first_init.sh && \
 ./first_init.sh && \
 rm -f ./first_init.sh
-```
 
-```sh
-host_ip="10.0.0.98"
+# check host name to decide ip
+host_ip=""
+if [ $HOSTNAME = "center" ]; then
+    host_ip="10.0.0.99"
+elif [ $HOSTNAME = "trader" ]; then
+    host_ip="10.0.0.98"
+elif [ $HOSTNAME = "blog" ]; then
+    host_ip="10.0.0.97"
+fi
+
+echo "HOSTNAME: $HOSTNAME"
+echo "IP: $host_ip"
+
+# if host_ip is empty, exit
+if [ -z $host_ip ]; then
+    exit 1
+fi
+
 # if interface name is not ens224, replace it
 echo '# This file describes the network interfaces available on your system
 # and how to activate them. For more information, see interfaces(5).

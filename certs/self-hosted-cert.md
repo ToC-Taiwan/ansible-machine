@@ -11,34 +11,35 @@ apt install -y curl
 - set variables
 
 ```sh
+cert_path="/root/certbot_data"
+cert_bot_ip="10.0.0.9"
+
+server_ip=""
+domain_name=""
+if [ $HOSTNAME = "trader" ]; then
+    server_ip="10.0.0.20"
+    domain_name="trader.tocraw.com"
+elif [ $HOSTNAME = "blog" ]; then
+    server_ip="10.0.0.10"
+    domain_name="blog.tocandraw.com"
+fi
+
+# if host_ip is empty, exit
+if [ -z $server_ip ]; then
+    # print error message
+    echo "server_ip is empty"
+    exit 1
+fi
+
+echo "HOSTNAME: $HOSTNAME"
+echo "IP: $server_ip"
+echo "DOMAIN: $domain_name"
+
 macvlan_name="tocvlan"
 macvlan_parent="ens224"
 macvlan_subnet="10.0.0.0/24"
 macvlan_gateway="10.0.0.1"
-```
 
-- trader
-
-```sh
-cert_path="/root/certbot_data"
-server_ip="10.0.0.20"
-cert_bot_ip="10.0.0.9"
-domain_name="trader.tocraw.com"
-```
-
-- blog
-
-```sh
-cert_path="/root/certbot_data"
-server_ip="10.0.0.10"
-cert_bot_ip="10.0.0.9"
-domain_name="blog.tocandraw.com"
-```
-
-- new cert
-  - variables should be set before
-
-```sh
 rm -rf $cert_path
 
 mkdir -p $cert_path/www
