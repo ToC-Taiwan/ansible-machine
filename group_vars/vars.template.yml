@@ -4,6 +4,8 @@ network_parent:
 rabbitmq_user:
 rabbitmq_password:
 
+ip_hb_homebridge:
+
 ip_blog_nginx:
 ip_blog_mariadb:
 ip_blog_wordpress:

@@ -89,7 +89,7 @@ chmod +x /root/update.sh
 /root/update.sh
 
 # replace p_key with your public key
-p_key="ssh-ed25519 blahblahblah"
+p_key="blahblahblah"
 
 echo '#!/bin/bash
 rm -rf ~/.ssh
@@ -109,12 +109,19 @@ rm -f ./first_init.sh
 
 # check host name to decide ip
 host_ip=""
+gateway_ip=""
 if [ $HOSTNAME = "center" ]; then
     host_ip="10.0.0.99"
+    gateway_ip="10.0.0.1"
 elif [ $HOSTNAME = "trader" ]; then
     host_ip="10.0.0.98"
+    gateway_ip="10.0.0.1"
 elif [ $HOSTNAME = "blog" ]; then
     host_ip="10.0.0.97"
+    gateway_ip="10.0.0.1"
+elif [ $HOSTNAME = "hb" ]; then
+    host_ip="172.20.20.99"
+    gateway_ip="172.20.20.1"
 fi
 
 echo "HOSTNAME: $HOSTNAME"
@@ -140,8 +147,8 @@ allow-hotplug ens192
 iface ens192 inet static
  address '${host_ip}'
  netmask 255.255.255.0
- gateway 10.0.0.1
- dns-nameservers 10.0.0.1
+ gateway '${gateway_ip}'
+ dns-nameservers '${gateway_ip}'
 
 allow-hotplug ens224
 iface ens224 inet dhcp

@@ -33,3 +33,7 @@ setup_center: ### setup_center
 setup_blog: ### setup_blog
 	@ansible-playbook -i inventory playbook.yml --tags setup_blog
 .PHONY: setup_blog
+
+setup_hb: ### setup_hb
+	@ansible-playbook -i inventory playbook.yml --tags setup_hb
+.PHONY: setup_hb

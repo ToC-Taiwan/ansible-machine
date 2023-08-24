@@ -1,18 +1,18 @@
 # code: language=ansible
-- name: Basic Setup
+- name: BASIC
   tags: basic
   vars_files: group_vars/vars.yml
   hosts: all
   roles:
     - basic
 
-- name: Reboot
+- name: REBOOT
   tags: reboot
   hosts: all
   roles:
     - reboot
 
-- name: Setup Trader
+- name: SETUP TRADER
   tags: setup_trader
   vars_files: group_vars/vars.yml
   hosts: trader
@@ -20,21 +20,21 @@
     - reset_trader
     - setup_trader
 
-- name: Reset Trader
+- name: RESET TRADER
   tags: reset_trader
   vars_files: group_vars/vars.yml
   hosts: trader
   roles:
     - reset_trader
 
-- name: Reset DB
+- name: RESET DB
   tags: reset_db
   vars_files: group_vars/vars.yml
   hosts: center
   roles:
     - reset_db
 
-- name: Center Setup
+- name: CENTER SETUP
   tags: setup_center
   vars_files: group_vars/vars.yml
   hosts: center
@@ -42,16 +42,23 @@
     - reset_center
     - setup_center
 
-- name: Reset Center
+- name: RESET CENTER
   tags: reset_center
   vars_files: group_vars/vars.yml
   hosts: center
   roles:
     - reset_center
 
-- name: Center Setup
+- name: BLOG SETUP
   tags: setup_blog
   vars_files: group_vars/vars.yml
   hosts: blog
   roles:
     - setup_blog
+
+- name: HB SETUP
+  tags: setup_hb
+  vars_files: group_vars/vars.yml
+  hosts: hb
+  roles:
+    - setup_hb
