@@ -8,7 +8,7 @@
 
 - ### [Machine Setup](./docs/MACHINE_SETUP.md)
 
-- ### [Let's Encrypt](./examples/self-hosted-cert.md)
+- ### [Let's Encrypt](./certs/self-hosted-cert.md)
 
 ## Deploy
 

@@ -54,7 +54,6 @@
                 - /root/homebridge-data:/homebridge
             env:
                 TZ: "Asia/Taipei"
-                ENABLE_AVAHI: "0"
             networks:
                 - name: "{{ network_name }}"
                   ipv4_address: "{{ ip_hb_homebridge }}"
