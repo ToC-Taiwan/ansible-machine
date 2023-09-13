@@ -24,17 +24,22 @@
       volumes: true
       builder_cache: true
 
-- name: Create macvlan
+- name: Reset docker
+  ansible.builtin.file:
+      path: /etc/docker/daemon.json
+      state: absent
+
+- name: Reload docker
+  ansible.builtin.systemd:
+      name: docker
+      state: restarted
+
+- name: Create blog bridge network
   community.docker.docker_network:
       name: "{{ network_name }}"
-      state: present
-      driver: macvlan
-      driver_options:
-          parent: "{{ network_parent }}"
+      enable_ipv6: true
       ipam_config:
-          - gateway: "10.0.0.1"
-            subnet: "10.0.0.0/24"
-            iprange: "10.0.0.0/24"
+          - subnet: "fdd0:31ae:44cd:adb2::/64"
 
 - name: Remove backup job
   ansible.builtin.lineinfile:
@@ -108,19 +113,20 @@
       image: mariadb:latest
       restart_policy: always
       detach: true
+      published_ports:
+          - "3306:3306"
       env:
           MARIADB_ROOT_PASSWORD: "asdf0000"
           MARIADB_ROOT_HOST: "%"
           TZ: "Asia/Taipei"
       networks:
           - name: "{{ network_name }}"
-            ipv4_address: "{{ ip_blog_mariadb }}"
 
 - name: Check if is listening
   ansible.builtin.wait_for:
       port: 3306
       delay: 5
-      host: "{{ ip_blog_mariadb }}"
+      host: "127.0.0.1"
       timeout: 120
 
 - name: Make sure pymysql is installed
@@ -135,7 +141,7 @@
       state: absent
       login_user: root
       login_password: asdf0000
-      login_host: "{{ ip_blog_mariadb }}"
+      login_host: "127.0.0.1"
 
 - name: Create database with name 'wordpress'
   community.mysql.mysql_db:
@@ -143,7 +149,7 @@
       state: present
       login_user: root
       login_password: asdf0000
-      login_host: "{{ ip_blog_mariadb }}"
+      login_host: "127.0.0.1"
       encoding: utf8mb4
       collation: utf8mb4_general_ci
 
@@ -153,7 +159,7 @@
       state: import
       login_user: root
       login_password: asdf0000
-      login_host: "{{ ip_blog_mariadb }}"
+      login_host: "127.0.0.1"
       target: "/root/tmp/wordpress_db_{{ latest_file.path | basename | regex_replace('\\.tar.gz', '') }}.sql"
 
 - name: Start wordpress
@@ -162,8 +168,10 @@
       image: wordpress:latest
       restart_policy: always
       detach: true
+      published_ports:
+          - "8080:80"
       env:
-          WORDPRESS_DB_HOST: "{{ ip_blog_mariadb }}"
+          WORDPRESS_DB_HOST: "mariadb"
           WORDPRESS_DB_USER: "root"
           WORDPRESS_DB_PASSWORD: "asdf0000"
           WORDPRESS_DB_NAME: "wordpress"
@@ -174,13 +182,12 @@
           - /root/wordpress_data/wordpress.ini:/usr/local/etc/php/conf.d/wordpress.ini
       networks:
           - name: "{{ network_name }}"
-            ipv4_address: "{{ ip_blog_wordpress }}"
 
 - name: Check if is listening
   ansible.builtin.wait_for:
-      port: 80
+      port: 8080
       delay: 5
-      host: "{{ ip_blog_wordpress }}"
+      host: "127.0.0.1"
       timeout: 120
 
 - name: Nginx
@@ -201,19 +208,23 @@
             image: nginx:latest
             restart_policy: always
             detach: true
+            published_ports:
+                - "[::]:443:8443"
+                - "443:443"
+                - "[::]:80:8080"
+                - "80:80"
             volumes:
                 - /root/ansible-config/nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf:ro
                 - /root/certbot_data/www:/var/www/certbot/:ro
                 - /root/certbot_data/conf:/etc/nginx/ssl/:ro
             networks:
                 - name: "{{ network_name }}"
-                  ipv4_address: "{{ ip_blog_nginx }}"
 
 - name: Check if is listening
   ansible.builtin.wait_for:
       port: 443
       delay: 5
-      host: "{{ ip_blog_nginx }}"
+      host: "127.0.0.1"
       timeout: 120
 
 - name: Delete tmp folder

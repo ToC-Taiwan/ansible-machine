@@ -60,6 +60,15 @@
 
 - name: Loki
   block:
+    - name: Diable loki
+      community.docker.docker_plugin:
+        plugin_name: loki
+        state: disable
+    - name: Remove loki
+      community.docker.docker_plugin:
+        plugin_name: grafana/loki-docker-driver:latest
+        alias: loki
+        state: absent
     - name: Install loki
       community.docker.docker_plugin:
         plugin_name: grafana/loki-docker-driver:latest
@@ -93,6 +102,7 @@
 
 - name: Start node exporter
   community.docker.docker_container:
+    # https://hub.docker.com/r/bitnami/node-exporter/tags
     name: node-exporter
     image: bitnami/node-exporter:1.6.1
     restart_policy: always
@@ -119,6 +129,7 @@
         mode: "644"
     - name: Start Nginx
       community.docker.docker_container:
+        # https://hub.docker.com/_/nginx/tags
         name: nginx
         image: nginx:1.25.2
         restart_policy: always
@@ -135,8 +146,9 @@
   block:
     - name: Start Rabbitmq
       community.docker.docker_container:
+        # https://hub.docker.com/_/rabbitmq/tags
         name: toc-rabbitmq
-        image: rabbitmq:3.12.3-management
+        image: rabbitmq:3.12.4-management
         restart_policy: always
         detach: true
         env:

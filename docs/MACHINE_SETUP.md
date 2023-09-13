@@ -66,23 +66,21 @@ echo '# This file describes the network interfaces available on your system
 
 source /etc/network/interfaces.d/*
 
-# The loopback network interface
 auto lo
 iface lo inet loopback
 
-# The primary network interface
-allow-hotplug ens192
+auto ens192
 iface ens192 inet static
  address '${host_ip}'
  netmask 255.255.255.0
  gateway '${gateway_ip}'
  dns-nameservers '${gateway_ip}'
-
-allow-hotplug ens224
-iface ens224 inet dhcp
-
-# This is an autoconfigured IPv6 interface
 iface ens192 inet6 auto
+
+auto ens224
+iface ens224 inet dhcp
+iface ens224 inet6 auto
+
 ' > /etc/network/interfaces
 ```
 

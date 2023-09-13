@@ -88,7 +88,7 @@
       community.docker.docker_container:
         # https://hub.docker.com/r/grafana/loki/tags
         name: loki
-        image: grafana/loki:2.9.0
+        image: grafana/loki:2.8.4
         restart_policy: always
         detach: true
         volumes:

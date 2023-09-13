@@ -12,7 +12,7 @@ cp -r /root/wordpress_data ./tmp
 # cp -r /root/nginx_data ./tmp
 cp -r /root/certbot_data ./tmp
 
-mysqldump -h {{ ip_blog_mariadb }} -u root -pasdf0000 wordpress >./tmp/wordpress_db_$now.sql
+mysqldump -h 127.0.0.1 -u root -pasdf0000 wordpress >./tmp/wordpress_db_$now.sql
 
 tar -czvf $now.tar.gz ./tmp/*
 

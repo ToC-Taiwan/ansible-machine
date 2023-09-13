@@ -94,6 +94,7 @@
             src: daemon.json.j2
             dest: /etc/docker/daemon.json
             mode: "644"
+        when: inventory_hostname not in ['blog']
 
       - name: Reload docker
         ansible.builtin.systemd:
