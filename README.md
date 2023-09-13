@@ -6,9 +6,9 @@
 
 ## Target
 
-- ### [Machine Setup](./docs/MACHINE_SETUP.md)
+- ### [Machine Setup](./docs/machine-setup.md)
 
-- ### [Let's Encrypt](./certs/self-hosted-cert.md)
+- ### [Let's Encrypt](./docs/self-hosted-cert.md)
 
 ## Deploy
 
