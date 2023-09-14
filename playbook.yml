@@ -17,7 +17,7 @@
   vars_files: group_vars/vars.yml
   hosts: trader
   roles:
-    - reset_trader
+    - remove_all_container
     - setup_trader
 
 - name: RESET TRADER
@@ -25,7 +25,7 @@
   vars_files: group_vars/vars.yml
   hosts: trader
   roles:
-    - reset_trader
+    - remove_all_container
 
 - name: RESET DB
   tags: reset_db
@@ -39,7 +39,7 @@
   vars_files: group_vars/vars.yml
   hosts: center
   roles:
-    - reset_center
+    - remove_all_container
     - setup_center
 
 - name: RESET CENTER
@@ -47,13 +47,15 @@
   vars_files: group_vars/vars.yml
   hosts: center
   roles:
-    - reset_center
+    - remove_all_container
 
 - name: BLOG SETUP
   tags: setup_blog
   vars_files: group_vars/vars.yml
   hosts: blog
   roles:
+    - remove_all_container
+    - basic
     - setup_blog
 
 - name: HB SETUP
@@ -61,4 +63,6 @@
   vars_files: group_vars/vars.yml
   hosts: hb
   roles:
+    - remove_all_container
+    - basic
     - setup_hb
