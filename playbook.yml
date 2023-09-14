@@ -27,13 +27,6 @@
   roles:
     - remove_all_container
 
-- name: RESET DB
-  tags: reset_db
-  vars_files: group_vars/vars.yml
-  hosts: center
-  roles:
-    - reset_db
-
 - name: CENTER SETUP
   tags: setup_center
   vars_files: group_vars/vars.yml
