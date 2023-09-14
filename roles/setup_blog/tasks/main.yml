@@ -1,18 +1,14 @@
 # code: language=ansible
-- name: Remove nginx
-  community.docker.docker_container:
-      name: nginx
-      state: absent
+- name: Get running containers
+  community.docker.docker_host_info:
+      containers: true
+  register: docker_info
 
-- name: Remove wordpress
+- name: Remove running containers
   community.docker.docker_container:
-      name: wordpress
+      name: "{{ item.Id }}"
       state: absent
-
-- name: Remove mariadb
-  community.docker.docker_container:
-      name: mariadb
-      state: absent
+  loop: "{{ docker_info.containers }}"
 
 - name: Prune everything (including non-dangling images)
   community.docker.docker_prune:
@@ -41,29 +37,29 @@
       ipam_config:
           - subnet: "fdd0:31ae:44cd:adb2::/64"
 
-- name: Remove backup job
-  ansible.builtin.lineinfile:
-      path: /etc/crontab
-      state: absent
-      regexp: "/backup_site.sh"
-
 - name: Configure backup script
   ansible.builtin.template:
       src: backup_site.sh.j2
       dest: /root/backup_site.sh
       mode: "755"
 
-- name: Add backup job
+- name: Remove backup cron job in `/etc/crontab`
+  ansible.builtin.lineinfile:
+      path: /etc/crontab
+      state: absent
+      regexp: "/backup_site.sh"
+
+- name: Add backup cron job
   ansible.builtin.shell: echo "0 4 * * * root /root/backup_site.sh" >> /etc/crontab
   register: my_output
   changed_when: my_output.rc != 0
 
-- name: Get files in a folder
+- name: Get backup files list
   ansible.builtin.find:
       paths: "/root/wordpress_backup"
   register: found_files
 
-- name: Get latest file
+- name: Get latest backup
   ansible.builtin.set_fact:
       latest_file: "{{ found_files.files | sort(attribute='mtime', reverse=true) | first }}"
 
