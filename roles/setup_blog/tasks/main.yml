@@ -177,6 +177,11 @@
             src: nginx.conf.j2
             dest: /root/ansible-config/nginx/nginx.conf
             mode: "644"
+      - name: Add Sitemap
+        ansible.builtin.template:
+            src: sitemap.xml.j2
+            dest: /root/ansible-config/nginx/sitemap.xml
+            mode: "644"
       - name: Start Nginx
         community.docker.docker_container:
             name: nginx
@@ -190,6 +195,7 @@
                 - "80:80"
             volumes:
                 - /root/ansible-config/nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf:ro
+                - /root/ansible-config/nginx/sitemap.xml:/var/sitemap.xml:ro
                 - /root/certbot_data/www:/var/www/certbot/:ro
                 - /root/certbot_data/conf:/etc/nginx/ssl/:ro
             networks:
