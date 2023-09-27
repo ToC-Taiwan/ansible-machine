@@ -57,6 +57,11 @@
       dest: /root/
       remote_src: true
 
+- name: Delete old wordpress_data folder
+  ansible.builtin.file:
+      path: /root/wordpress_data
+      state: absent
+
 - name: Copy file with owner and permissions
   ansible.builtin.copy:
       src: /root/tmp/wordpress_data
@@ -137,6 +142,26 @@
       login_host: "127.0.0.1"
       target: "/root/tmp/wordpress_db_{{ latest_file.path | basename | regex_replace('\\.tar.gz', '') }}.sql"
 
+- name: Start redis
+  community.docker.docker_container:
+      name: redis
+      image: redis:latest
+      restart_policy: always
+      detach: true
+      published_ports:
+          - "6379:6379"
+      env:
+          TZ: "Asia/Taipei"
+      networks:
+          - name: "{{ network_name }}"
+
+- name: Check if is listening
+  ansible.builtin.wait_for:
+      port: 6379
+      delay: 5
+      host: "127.0.0.1"
+      timeout: 120
+
 - name: Start wordpress
   community.docker.docker_container:
       name: wordpress
@@ -165,6 +190,23 @@
       host: "127.0.0.1"
       timeout: 120
 
+- name: Install reids for wordpress
+  community.docker.docker_container_exec:
+      container: wordpress
+      command: pecl install redis
+
+- name: Restart wordpress
+  community.docker.docker_container:
+      name: wordpress
+      restart: true
+
+- name: Check if is listening
+  ansible.builtin.wait_for:
+      port: 8080
+      delay: 5
+      host: "127.0.0.1"
+      timeout: 120
+
 - name: Nginx
   block:
       - name: Create config folder
@@ -176,11 +218,6 @@
         ansible.builtin.template:
             src: nginx.conf.j2
             dest: /root/ansible-config/nginx/nginx.conf
-            mode: "644"
-      - name: Add Sitemap
-        ansible.builtin.template:
-            src: sitemap.xml.j2
-            dest: /root/ansible-config/nginx/sitemap.xml
             mode: "644"
       - name: Start Nginx
         community.docker.docker_container:
@@ -195,7 +232,6 @@
                 - "80:80"
             volumes:
                 - /root/ansible-config/nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf:ro
-                - /root/ansible-config/nginx/sitemap.xml:/var/sitemap.xml:ro
                 - /root/certbot_data/www:/var/www/certbot/:ro
                 - /root/certbot_data/conf:/etc/nginx/ssl/:ro
             networks:
