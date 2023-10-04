@@ -165,11 +165,11 @@
 - name: Start wordpress
   community.docker.docker_container:
       name: wordpress
-      image: wordpress:latest
+      image: wordpress:fpm
       restart_policy: always
       detach: true
       published_ports:
-          - "8080:80"
+          - "9000:9000"
       env:
           WORDPRESS_DB_HOST: "mariadb"
           WORDPRESS_DB_USER: "root"
@@ -185,7 +185,7 @@
 
 - name: Check if is listening
   ansible.builtin.wait_for:
-      port: 8080
+      port: 9000
       delay: 5
       host: "127.0.0.1"
       timeout: 120
@@ -202,7 +202,7 @@
 
 - name: Check if is listening
   ansible.builtin.wait_for:
-      port: 8080
+      port: 9000
       delay: 5
       host: "127.0.0.1"
       timeout: 120
@@ -216,7 +216,7 @@
             mode: "755"
       - name: Configure Nginx
         ansible.builtin.template:
-            src: nginx.conf.j2
+            src: nginx.fpm.conf.j2
             dest: /root/ansible-config/nginx/nginx.conf
             mode: "644"
       - name: Start Nginx
@@ -234,6 +234,8 @@
                 - /root/ansible-config/nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf:ro
                 - /root/certbot_data/www:/var/www/certbot/:ro
                 - /root/certbot_data/conf:/etc/nginx/ssl/:ro
+            volumes_from:
+                - wordpress
             networks:
                 - name: "{{ network_name }}"
 

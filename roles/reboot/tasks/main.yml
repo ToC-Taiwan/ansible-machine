@@ -4,5 +4,9 @@
   register: uptime
   changed_when: uptime.rc != 0
 
+- name: Show uptime
+  ansible.builtin.debug:
+      msg: "Uptime: {{ uptime.stdout }}"
+
 - name: Reboot the machine with all defaults
   ansible.builtin.reboot:
