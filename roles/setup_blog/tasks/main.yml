@@ -77,135 +77,129 @@
       dest: /root/wordpress_data/wordpress.ini
       mode: "644"
 
-- name: Install mariadb-server
-  ansible.builtin.apt:
-      name: mariadb-server
-      update_cache: true
+- name: MariaDB
+  block:
+      - name: Install mariadb-server
+        ansible.builtin.apt:
+            name: mariadb-server
+            update_cache: true
+      - name: Disable mariadb
+        ansible.builtin.systemd:
+            name: mysql
+            enabled: false
+      - name: Start mariadb container
+        community.docker.docker_container:
+            name: mariadb
+            image: mariadb:latest
+            restart_policy: always
+            detach: true
+            published_ports:
+                - "3306:3306"
+            env:
+                MARIADB_ROOT_PASSWORD: "asdf0000"
+                MARIADB_ROOT_HOST: "%"
+                TZ: "Asia/Taipei"
+            networks:
+                - name: "{{ network_name }}"
+      - name: Check if is listening
+        ansible.builtin.wait_for:
+            port: 3306
+            delay: 5
+            host: "127.0.0.1"
+            timeout: 120
+      - name: Make sure pymysql is installed
+        ansible.builtin.pip:
+            name: pymysql
+            state: present
+            extra_args: "--break-system-packages"
+      - name: Drop database with name wordpress
+        community.mysql.mysql_db:
+            name: wordpress
+            state: absent
+            login_user: root
+            login_password: asdf0000
+            login_host: "127.0.0.1"
+      - name: Create database with name wordpress
+        community.mysql.mysql_db:
+            name: wordpress
+            state: present
+            login_user: root
+            login_password: asdf0000
+            login_host: "127.0.0.1"
+            encoding: utf8mb4
+            collation: utf8mb4_general_ci
+      - name: Restore database
+        community.mysql.mysql_db:
+            name: wordpress
+            state: import
+            login_user: root
+            login_password: asdf0000
+            login_host: "127.0.0.1"
+            target: "/root/tmp/wordpress_db_{{ latest_file.path | basename | regex_replace('\\.tar.gz', '') }}.sql"
 
-- name: Disable mariadb
-  ansible.builtin.systemd:
-      name: mysql
-      enabled: false
+- name: Redis
+  block:
+      - name: Start redis
+        community.docker.docker_container:
+            name: redis
+            image: redis:latest
+            restart_policy: always
+            detach: true
+            published_ports:
+                - "6379:6379"
+            env:
+                TZ: "Asia/Taipei"
+            networks:
+                - name: "{{ network_name }}"
+      - name: Check if is listening
+        ansible.builtin.wait_for:
+            port: 6379
+            delay: 5
+            host: "127.0.0.1"
+            timeout: 120
 
-- name: Start mariadb container
-  community.docker.docker_container:
-      name: mariadb
-      image: mariadb:latest
-      restart_policy: always
-      detach: true
-      published_ports:
-          - "3306:3306"
-      env:
-          MARIADB_ROOT_PASSWORD: "asdf0000"
-          MARIADB_ROOT_HOST: "%"
-          TZ: "Asia/Taipei"
-      networks:
-          - name: "{{ network_name }}"
-
-- name: Check if is listening
-  ansible.builtin.wait_for:
-      port: 3306
-      delay: 5
-      host: "127.0.0.1"
-      timeout: 120
-
-- name: Make sure pymysql is installed
-  ansible.builtin.pip:
-      name: pymysql
-      state: present
-      extra_args: "--break-system-packages"
-
-- name: Drop database with name 'wordpress'
-  community.mysql.mysql_db:
-      name: wordpress
-      state: absent
-      login_user: root
-      login_password: asdf0000
-      login_host: "127.0.0.1"
-
-- name: Create database with name 'wordpress'
-  community.mysql.mysql_db:
-      name: wordpress
-      state: present
-      login_user: root
-      login_password: asdf0000
-      login_host: "127.0.0.1"
-      encoding: utf8mb4
-      collation: utf8mb4_general_ci
-
-- name: Restore database
-  community.mysql.mysql_db:
-      name: wordpress
-      state: import
-      login_user: root
-      login_password: asdf0000
-      login_host: "127.0.0.1"
-      target: "/root/tmp/wordpress_db_{{ latest_file.path | basename | regex_replace('\\.tar.gz', '') }}.sql"
-
-- name: Start redis
-  community.docker.docker_container:
-      name: redis
-      image: redis:latest
-      restart_policy: always
-      detach: true
-      published_ports:
-          - "6379:6379"
-      env:
-          TZ: "Asia/Taipei"
-      networks:
-          - name: "{{ network_name }}"
-
-- name: Check if is listening
-  ansible.builtin.wait_for:
-      port: 6379
-      delay: 5
-      host: "127.0.0.1"
-      timeout: 120
-
-- name: Start wordpress
-  community.docker.docker_container:
-      name: wordpress
-      image: wordpress:fpm
-      restart_policy: always
-      detach: true
-      published_ports:
-          - "9000:9000"
-      env:
-          WORDPRESS_DB_HOST: "mariadb"
-          WORDPRESS_DB_USER: "root"
-          WORDPRESS_DB_PASSWORD: "asdf0000"
-          WORDPRESS_DB_NAME: "wordpress"
-          WORDPRESS_TABLE_PREFIX: "wp_"
-          TZ: "Asia/Taipei"
-      volumes:
-          - /root/wordpress_data:/var/www/html
-          - /root/wordpress_data/wordpress.ini:/usr/local/etc/php/conf.d/wordpress.ini
-      networks:
-          - name: "{{ network_name }}"
-
-- name: Check if is listening
-  ansible.builtin.wait_for:
-      port: 9000
-      delay: 5
-      host: "127.0.0.1"
-      timeout: 120
-
-- name: Install reids for wordpress
-  community.docker.docker_container_exec:
-      container: wordpress
-      command: pecl install redis
-
-- name: Restart wordpress
-  community.docker.docker_container:
-      name: wordpress
-      restart: true
-
-- name: Check if is listening
-  ansible.builtin.wait_for:
-      port: 9000
-      delay: 5
-      host: "127.0.0.1"
-      timeout: 120
+- name: Wordpress
+  block:
+      - name: Start wordpress
+        community.docker.docker_container:
+            name: wordpress
+            image: wordpress:fpm
+            restart_policy: always
+            detach: true
+            published_ports:
+                - "9000:9000"
+            env:
+                WORDPRESS_DB_HOST: "mariadb"
+                WORDPRESS_DB_USER: "root"
+                WORDPRESS_DB_PASSWORD: "asdf0000"
+                WORDPRESS_DB_NAME: "wordpress"
+                WORDPRESS_TABLE_PREFIX: "wp_"
+                TZ: "Asia/Taipei"
+            volumes:
+                - /root/wordpress_data:/var/www/html
+                - /root/wordpress_data/wordpress.ini:/usr/local/etc/php/conf.d/wordpress.ini
+            networks:
+                - name: "{{ network_name }}"
+      - name: Check if is listening
+        ansible.builtin.wait_for:
+            port: 9000
+            delay: 5
+            host: "127.0.0.1"
+            timeout: 120
+      - name: Install reids for wordpress
+        community.docker.docker_container_exec:
+            container: wordpress
+            command: pecl install redis
+      - name: Restart wordpress
+        community.docker.docker_container:
+            name: wordpress
+            restart: true
+      - name: Check if is listening
+        ansible.builtin.wait_for:
+            port: 9000
+            delay: 5
+            host: "127.0.0.1"
+            timeout: 120
 
 - name: Nginx
   block:
@@ -238,13 +232,12 @@
                 - wordpress
             networks:
                 - name: "{{ network_name }}"
-
-- name: Check if is listening
-  ansible.builtin.wait_for:
-      port: 443
-      delay: 5
-      host: "127.0.0.1"
-      timeout: 120
+      - name: Check if is listening
+        ansible.builtin.wait_for:
+            port: 443
+            delay: 5
+            host: "127.0.0.1"
+            timeout: 120
 
 - name: Delete tmp folder
   ansible.builtin.file:
