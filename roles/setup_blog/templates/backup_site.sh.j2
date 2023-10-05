@@ -11,7 +11,7 @@ mkdir -p $backup_dir
 mkdir tmp
 
 cp -r /root/wordpress_data ./tmp
-cp -r /root/certbot_data ./tmp
+cp -r /root/certs ./tmp
 
 mysqldump -h 127.0.0.1 -u root -pasdf0000 wordpress >./tmp/wordpress_db_$now.sql
 

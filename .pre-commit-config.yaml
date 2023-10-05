@@ -7,3 +7,8 @@ repos:
           - id: check-yaml
           - id: check-shebang-scripts-are-executable
           - id: detect-private-key
+exclude: |
+    (?x)^(
+        roles/setup_blog/templates/fullchain.pem.j2|
+        roles/setup_blog/templates/privkey.pem.j2
+    )$

@@ -8,55 +8,32 @@ apt update
 apt install -y curl
 ```
 
-- set variables
-
 ```sh
-cert_path="/root/certbot_data"
-cert_bot_ip="10.0.0.9"
-
-server_ip=""
 domain_name=""
 if [ $HOSTNAME = "trader" ]; then
-    server_ip="10.0.0.20"
     domain_name="trader.tocraw.com"
 elif [ $HOSTNAME = "blog" ]; then
-    server_ip="10.0.0.10"
-    domain_name="blog.tocandraw.com"
+    domain_name="tocandraw.com"
 fi
-
-# if host_ip is empty, exit
-if [ -z $server_ip ]; then
-    # print error message
-    echo "server_ip is empty"
+if [ -z $domain_name ]; then
+    echo "domain_name is empty"
     exit 1
 fi
-
 echo "HOSTNAME: $HOSTNAME"
-echo "IP: $server_ip"
 echo "DOMAIN: $domain_name"
 
-macvlan_name="tocvlan"
-macvlan_parent="ens224"
-macvlan_subnet="10.0.0.0/24"
-macvlan_gateway="10.0.0.1"
-
+cert_path="/root/certbot_data"
 rm -rf $cert_path
-
 mkdir -p $cert_path/www
 mkdir -p $cert_path/conf
 
 docker stop nginx
 docker stop certbot
 docker system prune --volumes -f
-docker network create -d macvlan \
-    --subnet=$macvlan_subnet \
-    --gateway=$macvlan_gateway \
-    -o parent=$macvlan_parent \
-    $macvlan_name
 
 echo "server {
-    listen 80 default_server;
-    listen [::]:80 default_server;
+    listen 80;
+    listen [::]:80;
     server_name ${domain_name};
 
     location /.well-known/acme-challenge/ {
@@ -66,17 +43,16 @@ echo "server {
 
 docker run -d \
     --name nginx \
-    --network $macvlan_name \
-    --ip=$server_ip \
+    -p 80:80 \
     -v $(pwd)/nginx_default.conf:/etc/nginx/conf.d/nginx_default.conf:ro \
     -v $cert_path/www:/var/www/certbot/:ro \
     -v $cert_path/conf:/etc/nginx/ssl/:ro \
     nginx:latest
 
+docker stop certbot
+docker system prune --volumes -f
 docker run -it \
     --name certbot \
-    --network $macvlan_name \
-    --ip=$cert_bot_ip \
     -v $cert_path/www:/var/www/certbot/:rw \
     -v $cert_path/conf:/etc/letsencrypt/:rw \
     certbot/certbot:latest certonly \
@@ -100,12 +76,13 @@ docker system prune --volumes -f
   - variables are the same as new cert
 
 ```sh
+cert_path="/root/certbot_data"
+
 docker stop certbot
 docker system prune --volumes -f
+
 docker run -it \
     --name certbot \
-    --network $macvlan_name \
-    --ip=$cert_bot_ip \
     -v $cert_path/www:/var/www/certbot/:rw \
     -v $cert_path/conf:/etc/letsencrypt/:rw \
     certbot/certbot:latest renew

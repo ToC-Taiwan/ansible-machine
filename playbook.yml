@@ -51,6 +51,13 @@
     - basic
     - setup_blog
 
+- name: RESET BLOG
+  tags: reset_blog
+  vars_files: group_vars/vars.yml
+  hosts: blog
+  roles:
+    - remove_all_container
+
 - name: HB SETUP
   tags: setup_hb
   vars_files: group_vars/vars.yml

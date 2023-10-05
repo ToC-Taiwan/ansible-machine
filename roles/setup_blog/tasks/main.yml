@@ -147,6 +147,7 @@
             detach: true
             published_ports:
                 - "6379:6379"
+                - "9000:9000"
             env:
                 TZ: "Asia/Taipei"
             networks:
@@ -166,8 +167,6 @@
             image: wordpress:fpm
             restart_policy: always
             detach: true
-            published_ports:
-                - "9000:9000"
             env:
                 WORDPRESS_DB_HOST: "mariadb"
                 WORDPRESS_DB_USER: "root"
@@ -178,8 +177,7 @@
             volumes:
                 - /root/wordpress_data:/var/www/html
                 - /root/wordpress_data/wordpress.ini:/usr/local/etc/php/conf.d/wordpress.ini
-            networks:
-                - name: "{{ network_name }}"
+            network_mode: container:redis
       - name: Check if is listening
         ansible.builtin.wait_for:
             port: 9000
@@ -213,6 +211,21 @@
             src: nginx.fpm.conf.j2
             dest: /root/ansible-config/nginx/nginx.conf
             mode: "644"
+      - name: Create certs folder
+        ansible.builtin.file:
+            path: /root/certs
+            state: directory
+            mode: "755"
+      - name: Create certs
+        ansible.builtin.template:
+            src: fullchain.pem.j2
+            dest: /root/certs/fullchain.pem
+            mode: "644"
+      - name: Create private key
+        ansible.builtin.template:
+            src: privkey.pem.j2
+            dest: /root/certs/privkey.pem
+            mode: "644"
       - name: Start Nginx
         community.docker.docker_container:
             name: nginx
@@ -222,12 +235,9 @@
             published_ports:
                 - "[::]:443:8443"
                 - "443:443"
-                - "[::]:80:8080"
-                - "80:80"
             volumes:
                 - /root/ansible-config/nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf:ro
-                - /root/certbot_data/www:/var/www/certbot/:ro
-                - /root/certbot_data/conf:/etc/nginx/ssl/:ro
+                - /root/certs:/etc/ssl:ro
             volumes_from:
                 - wordpress
             networks:
