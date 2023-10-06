@@ -22,7 +22,7 @@
       dest: /root/backup_site.sh
       mode: "755"
 
-- name: Remove backup cron job in `/etc/crontab`
+- name: Remove backup cron job in /etc/crontab
   ansible.builtin.lineinfile:
       path: /etc/crontab
       state: absent
