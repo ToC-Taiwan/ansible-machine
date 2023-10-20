@@ -26,3 +26,18 @@ find $backup_dir -name "*.gz" -type f -mtime +14 -delete
 docker container restart redis
 docker container restart wordpress
 docker container restart nginx
+
+while ! nc -z localhost 443; do
+  sleep 3
+done
+
+docker rmi -f $(docker images -a -q)
+auth="{{ cloudflare_auth }}"
+zone="{{ cloudflare_zone }}"
+docker run --rm \
+    --name lbcrawler \
+    --network {{ network_name }} \
+    -e CLOUDFLARE_AUTH="$auth" \
+    -e CLOUDFLARE_ZONE="$zone" \
+    maochindada/life-blog-crawler:latest
+docker system prune --volumes -f

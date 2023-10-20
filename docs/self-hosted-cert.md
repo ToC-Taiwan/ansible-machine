@@ -41,7 +41,7 @@ echo "server {
     }
 }" >nginx_default.conf
 
-docker run -d \
+docker run -d --rm \
     --name nginx \
     -p 80:80 \
     -v $(pwd)/nginx_default.conf:/etc/nginx/conf.d/nginx_default.conf:ro \
@@ -49,9 +49,7 @@ docker run -d \
     -v $cert_path/conf:/etc/nginx/ssl/:ro \
     nginx:latest
 
-docker stop certbot
-docker system prune --volumes -f
-docker run -it \
+docker run -it --rm \
     --name certbot \
     -v $cert_path/www:/var/www/certbot/:rw \
     -v $cert_path/conf:/etc/letsencrypt/:rw \
@@ -68,7 +66,6 @@ rm nginx_default.conf
 curl https://ssl-config.mozilla.org/ffdhe2048.txt >$cert_path/conf/live/$domain_name/dhparam
 
 docker stop nginx
-docker stop certbot
 docker system prune --volumes -f
 ```
 
@@ -81,7 +78,7 @@ cert_path="/root/certbot_data"
 docker stop certbot
 docker system prune --volumes -f
 
-docker run -it \
+docker run --rm \
     --name certbot \
     -v $cert_path/www:/var/www/certbot/:rw \
     -v $cert_path/conf:/etc/letsencrypt/:rw \

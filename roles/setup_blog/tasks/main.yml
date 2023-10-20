@@ -77,6 +77,12 @@
       dest: /root/wordpress_data/wordpress.ini
       mode: "644"
 
+- name: Login Docker Hub Container Registry
+  community.docker.docker_login:
+      username: "{{ docker_user }}"
+      password: "{{ docker_token }}"
+      reauthorize: true
+
 - name: MariaDB
   block:
       - name: Install mariadb-server

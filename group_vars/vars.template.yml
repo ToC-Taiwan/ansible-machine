@@ -44,6 +44,9 @@ docker_user:
 docker_password:
 docker_token:
 
+cloudflare_auth:
+cloudflare_zone:
+
 mt_config:
     simulation:
     manual_trade:
