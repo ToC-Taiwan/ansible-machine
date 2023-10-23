@@ -1,13 +1,9 @@
 # code: language=ansible
-- name: Reset docker
-  ansible.builtin.file:
-    path: /etc/docker/daemon.json
-    state: absent
-
-- name: Reload docker
-  ansible.builtin.systemd:
-    name: docker
-    state: restarted
+- name: Login Docker Hub Container Registry
+  community.docker.docker_login:
+    username: "{{ docker_user }}"
+    password: "{{ docker_token }}"
+    reauthorize: true
 
 - name: Create bridge network
   community.docker.docker_network:
@@ -79,12 +75,6 @@
     dest: /root/wordpress_data/wordpress.ini
     mode: "644"
 
-- name: Login Docker Hub Container Registry
-  community.docker.docker_login:
-    username: "{{ docker_user }}"
-    password: "{{ docker_token }}"
-    reauthorize: true
-
 - name: MariaDB
   block:
     - name: Install mariadb-server
@@ -96,7 +86,7 @@
         name: mysql
         state: stopped
         enabled: false
-    - name: Start mariadb container
+    - name: Start mariadb
       community.docker.docker_container:
         name: mariadb
         image: mariadb:latest
@@ -114,7 +104,6 @@
       ansible.builtin.wait_for:
         port: 3306
         delay: 5
-        host: "127.0.0.1"
         timeout: 120
     - name: Make sure pymysql is installed
       ansible.builtin.pip:
@@ -127,14 +116,12 @@
         state: absent
         login_user: root
         login_password: asdf0000
-        login_host: "127.0.0.1"
     - name: Create database with name wordpress
       community.mysql.mysql_db:
         name: wordpress
         state: present
         login_user: root
         login_password: asdf0000
-        login_host: "127.0.0.1"
         encoding: utf8mb4
         collation: utf8mb4_general_ci
     - name: Restore database
@@ -143,7 +130,6 @@
         state: import
         login_user: root
         login_password: asdf0000
-        login_host: "127.0.0.1"
         target: "/root/tmp/wordpress_db_{{ latest_file.path | basename | regex_replace('\\.tar.gz', '') }}.sql"
 
 - name: Redis
@@ -165,7 +151,6 @@
       ansible.builtin.wait_for:
         port: 6379
         delay: 5
-        host: "127.0.0.1"
         timeout: 120
 
 - name: Wordpress
@@ -191,7 +176,6 @@
       ansible.builtin.wait_for:
         port: 9000
         delay: 5
-        host: "127.0.0.1"
         timeout: 120
 
 - name: Nginx
@@ -241,7 +225,6 @@
       ansible.builtin.wait_for:
         port: 443
         delay: 5
-        host: "127.0.0.1"
         timeout: 120
 
 - name: Delete tmp folder

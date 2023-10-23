@@ -71,6 +71,7 @@
         plugin_name: grafana/loki-docker-driver:latest
         alias: loki
         state: absent
+        force_remove: true
     - name: Install loki
       community.docker.docker_plugin:
         plugin_name: grafana/loki-docker-driver:latest
@@ -119,40 +120,6 @@
     - name: Check if is listening
       ansible.builtin.wait_for:
         port: 9100
-        delay: 5
-        timeout: 120
-
-- name: Nginx
-  block:
-    - name: Create config folder
-      ansible.builtin.file:
-        path: /root/ansible-config/nginx
-        state: directory
-        mode: "755"
-    - name: Configure Nginx
-      ansible.builtin.template:
-        src: nginx.conf.j2
-        dest: /root/ansible-config/nginx/nginx.conf
-        mode: "644"
-    - name: Start Nginx
-      community.docker.docker_container:
-        # https://hub.docker.com/_/nginx/tags
-        name: nginx
-        image: nginx:1.25.2
-        published_ports:
-          - "80:80"
-          - "443:443"
-        restart_policy: always
-        detach: true
-        volumes:
-          - /root/ansible-config/nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf:ro
-          - /root/certbot_data/www:/var/www/certbot/:ro
-          - /root/certbot_data/conf:/etc/nginx/ssl/:ro
-        networks:
-          - name: "{{ network_name }}"
-    - name: Check if nginx is listening
-      ansible.builtin.wait_for:
-        port: 443
         delay: 5
         timeout: 120
 
@@ -290,5 +257,39 @@
     - name: Check if is listening
       ansible.builtin.wait_for:
         port: 26670
+        delay: 5
+        timeout: 120
+
+- name: Nginx
+  block:
+    - name: Create config folder
+      ansible.builtin.file:
+        path: /root/ansible-config/nginx
+        state: directory
+        mode: "755"
+    - name: Configure Nginx
+      ansible.builtin.template:
+        src: nginx.conf.j2
+        dest: /root/ansible-config/nginx/nginx.conf
+        mode: "644"
+    - name: Start Nginx
+      community.docker.docker_container:
+        # https://hub.docker.com/_/nginx/tags
+        name: nginx
+        image: nginx:1.25.2
+        published_ports:
+          - "80:80"
+          - "443:443"
+        restart_policy: always
+        detach: true
+        volumes:
+          - /root/ansible-config/nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf:ro
+          - /root/certbot_data/www:/var/www/certbot/:ro
+          - /root/certbot_data/conf:/etc/nginx/ssl/:ro
+        networks:
+          - name: "{{ network_name }}"
+    - name: Check if is listening
+      ansible.builtin.wait_for:
+        port: 443
         delay: 5
         timeout: 120

@@ -1,5 +1,5 @@
 # code: language=ansible
-- name: Return motd to registered var
+- name: Set uptime
   ansible.builtin.command: awk '{print int($1/3600)":"int(($1%3600)/60)":"int($1%60)}' /proc/uptime
   register: uptime
   changed_when: uptime.rc != 0
@@ -83,9 +83,9 @@
         state: directory
         mode: "755"
 
-    - name: Configure Docker
+    - name: Configure Docker Service
       ansible.builtin.template:
-        src: docker.j2
+        src: docker.override.conf.j2
         dest: /etc/systemd/system/docker.service.d/override.conf
         mode: "644"
 

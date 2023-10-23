@@ -3,6 +3,6 @@
   ansible.builtin.debug:
     msg: "Running on OS: {{ ansible_distribution }}"
 
-- name: If OS is Debian
+- name: Setup Debian
   ansible.builtin.include_tasks: setup-debian.yml
   when: ansible_distribution == "Debian"
