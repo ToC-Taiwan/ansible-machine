@@ -1,32 +1,34 @@
 # code: language=ansible
 - name: Reset docker
   ansible.builtin.file:
-      path: /etc/docker/daemon.json
-      state: absent
+    path: /etc/docker/daemon.json
+    state: absent
 
 - name: Reload docker
   ansible.builtin.systemd:
-      name: docker
-      state: restarted
+    name: docker
+    state: restarted
 
-- name: Create blog bridge network
+- name: Create bridge network
   community.docker.docker_network:
-      name: "{{ network_name }}"
-      enable_ipv6: true
-      ipam_config:
-          - subnet: "fdd0:31ae:44cd:adb2::/64"
+    name: "{{ network_name }}"
+    force: true
+    enable_ipv6: true
+    ipam_config:
+      - subnet: "172.99.10.0/24"
+      - subnet: "fdd0:31ae:44cd:adb2::/64"
 
 - name: Configure backup script
   ansible.builtin.template:
-      src: backup_site.sh.j2
-      dest: /root/backup_site.sh
-      mode: "755"
+    src: backup_site.sh.j2
+    dest: /root/backup_site.sh
+    mode: "755"
 
 - name: Remove backup cron job in /etc/crontab
   ansible.builtin.lineinfile:
-      path: /etc/crontab
-      state: absent
-      regexp: "/backup_site.sh"
+    path: /etc/crontab
+    state: absent
+    regexp: "/backup_site.sh"
 
 - name: Add backup cron job
   ansible.builtin.shell: echo "0 4 * * * root /root/backup_site.sh" >> /etc/crontab
@@ -35,227 +37,214 @@
 
 - name: Get backup files list
   ansible.builtin.find:
-      paths: "/root/wordpress_backup"
+    paths: "/root/wordpress_backup"
   register: found_files
 
 - name: Get latest backup
   ansible.builtin.set_fact:
-      latest_file: "{{ found_files.files | sort(attribute='mtime', reverse=true) | first }}"
+    latest_file: "{{ found_files.files | sort(attribute='mtime', reverse=true) | first }}"
 
 - name: Show latest file
   ansible.builtin.debug:
-      msg: "{{ latest_file.path }}"
+    msg: "{{ latest_file.path }}"
 
 - name: Delete tmp folder
   ansible.builtin.file:
-      path: /root/tmp
-      state: absent
+    path: /root/tmp
+    state: absent
 
 - name: Extract backup file into tmp folder
   ansible.builtin.unarchive:
-      src: "{{ latest_file.path }}"
-      dest: /root/
-      remote_src: true
+    src: "{{ latest_file.path }}"
+    dest: /root/
+    remote_src: true
 
 - name: Delete old wordpress_data folder
   ansible.builtin.file:
-      path: /root/wordpress_data
-      state: absent
+    path: /root/wordpress_data
+    state: absent
 
 - name: Copy file with owner and permissions
   ansible.builtin.copy:
-      src: /root/tmp/wordpress_data
-      dest: /root/
-      owner: www-data
-      group: www-data
-      mode: "preserve"
-      remote_src: true
+    src: /root/tmp/wordpress_data
+    dest: /root/
+    owner: www-data
+    group: www-data
+    mode: "preserve"
+    remote_src: true
 
 - name: Configure wordpress
   ansible.builtin.template:
-      src: wordpress.ini.j2
-      dest: /root/wordpress_data/wordpress.ini
-      mode: "644"
+    src: wordpress.ini.j2
+    dest: /root/wordpress_data/wordpress.ini
+    mode: "644"
 
 - name: Login Docker Hub Container Registry
   community.docker.docker_login:
-      username: "{{ docker_user }}"
-      password: "{{ docker_token }}"
-      reauthorize: true
+    username: "{{ docker_user }}"
+    password: "{{ docker_token }}"
+    reauthorize: true
 
 - name: MariaDB
   block:
-      - name: Install mariadb-server
-        ansible.builtin.apt:
-            name: mariadb-server
-            update_cache: true
-      - name: Disable mariadb
-        ansible.builtin.systemd:
-            name: mysql
-            enabled: false
-      - name: Start mariadb container
-        community.docker.docker_container:
-            name: mariadb
-            image: mariadb:latest
-            restart_policy: always
-            detach: true
-            published_ports:
-                - "3306:3306"
-            env:
-                MARIADB_ROOT_PASSWORD: "asdf0000"
-                MARIADB_ROOT_HOST: "%"
-                TZ: "Asia/Taipei"
-            networks:
-                - name: "{{ network_name }}"
-      - name: Check if is listening
-        ansible.builtin.wait_for:
-            port: 3306
-            delay: 5
-            host: "127.0.0.1"
-            timeout: 120
-      - name: Make sure pymysql is installed
-        ansible.builtin.pip:
-            name: pymysql
-            state: present
-            extra_args: "--break-system-packages"
-      - name: Drop database with name wordpress
-        community.mysql.mysql_db:
-            name: wordpress
-            state: absent
-            login_user: root
-            login_password: asdf0000
-            login_host: "127.0.0.1"
-      - name: Create database with name wordpress
-        community.mysql.mysql_db:
-            name: wordpress
-            state: present
-            login_user: root
-            login_password: asdf0000
-            login_host: "127.0.0.1"
-            encoding: utf8mb4
-            collation: utf8mb4_general_ci
-      - name: Restore database
-        community.mysql.mysql_db:
-            name: wordpress
-            state: import
-            login_user: root
-            login_password: asdf0000
-            login_host: "127.0.0.1"
-            target: "/root/tmp/wordpress_db_{{ latest_file.path | basename | regex_replace('\\.tar.gz', '') }}.sql"
+    - name: Install mariadb-server
+      ansible.builtin.apt:
+        name: mariadb-server
+        update_cache: true
+    - name: Disable mariadb
+      ansible.builtin.systemd:
+        name: mysql
+        state: stopped
+        enabled: false
+    - name: Start mariadb container
+      community.docker.docker_container:
+        name: mariadb
+        image: mariadb:latest
+        restart_policy: always
+        detach: true
+        published_ports:
+          - "3306:3306"
+        env:
+          MARIADB_ROOT_PASSWORD: "asdf0000"
+          MARIADB_ROOT_HOST: "%"
+          TZ: "Asia/Taipei"
+        networks:
+          - name: "{{ network_name }}"
+    - name: Check if is listening
+      ansible.builtin.wait_for:
+        port: 3306
+        delay: 5
+        host: "127.0.0.1"
+        timeout: 120
+    - name: Make sure pymysql is installed
+      ansible.builtin.pip:
+        name: pymysql
+        state: present
+        extra_args: "--break-system-packages"
+    - name: Drop database with name wordpress
+      community.mysql.mysql_db:
+        name: wordpress
+        state: absent
+        login_user: root
+        login_password: asdf0000
+        login_host: "127.0.0.1"
+    - name: Create database with name wordpress
+      community.mysql.mysql_db:
+        name: wordpress
+        state: present
+        login_user: root
+        login_password: asdf0000
+        login_host: "127.0.0.1"
+        encoding: utf8mb4
+        collation: utf8mb4_general_ci
+    - name: Restore database
+      community.mysql.mysql_db:
+        name: wordpress
+        state: import
+        login_user: root
+        login_password: asdf0000
+        login_host: "127.0.0.1"
+        target: "/root/tmp/wordpress_db_{{ latest_file.path | basename | regex_replace('\\.tar.gz', '') }}.sql"
 
 - name: Redis
   block:
-      - name: Start redis
-        community.docker.docker_container:
-            name: redis
-            image: redis:latest
-            restart_policy: always
-            detach: true
-            published_ports:
-                - "6379:6379"
-                - "9000:9000"
-            env:
-                TZ: "Asia/Taipei"
-            networks:
-                - name: "{{ network_name }}"
-      - name: Check if is listening
-        ansible.builtin.wait_for:
-            port: 6379
-            delay: 5
-            host: "127.0.0.1"
-            timeout: 120
+    - name: Start redis
+      community.docker.docker_container:
+        name: redis
+        image: redis:latest
+        restart_policy: always
+        detach: true
+        published_ports:
+          - "6379:6379"
+          - "9000:9000"
+        env:
+          TZ: "Asia/Taipei"
+        networks:
+          - name: "{{ network_name }}"
+    - name: Check if is listening
+      ansible.builtin.wait_for:
+        port: 6379
+        delay: 5
+        host: "127.0.0.1"
+        timeout: 120
 
 - name: Wordpress
   block:
-      - name: Start wordpress
-        community.docker.docker_container:
-            name: wordpress
-            image: wordpress:fpm
-            restart_policy: always
-            detach: true
-            env:
-                WORDPRESS_DB_HOST: "mariadb"
-                WORDPRESS_DB_USER: "root"
-                WORDPRESS_DB_PASSWORD: "asdf0000"
-                WORDPRESS_DB_NAME: "wordpress"
-                WORDPRESS_TABLE_PREFIX: "wp_"
-                TZ: "Asia/Taipei"
-            volumes:
-                - /root/wordpress_data:/var/www/html
-                - /root/wordpress_data/wordpress.ini:/usr/local/etc/php/conf.d/wordpress.ini
-            network_mode: container:redis
-      - name: Check if is listening
-        ansible.builtin.wait_for:
-            port: 9000
-            delay: 5
-            host: "127.0.0.1"
-            timeout: 120
-      - name: Install reids for wordpress
-        community.docker.docker_container_exec:
-            container: wordpress
-            command: pecl install redis
-      - name: Restart wordpress
-        community.docker.docker_container:
-            name: wordpress
-            restart: true
-      - name: Check if is listening
-        ansible.builtin.wait_for:
-            port: 9000
-            delay: 5
-            host: "127.0.0.1"
-            timeout: 120
+    - name: Start wordpress
+      community.docker.docker_container:
+        name: wordpress
+        image: maochindada/wp-redis:fpm
+        restart_policy: always
+        detach: true
+        env:
+          WORDPRESS_DB_HOST: "mariadb"
+          WORDPRESS_DB_USER: "root"
+          WORDPRESS_DB_PASSWORD: "asdf0000"
+          WORDPRESS_DB_NAME: "wordpress"
+          WORDPRESS_TABLE_PREFIX: "wp_"
+          TZ: "Asia/Taipei"
+        volumes:
+          - /root/wordpress_data:/var/www/html
+          - /root/wordpress_data/wordpress.ini:/usr/local/etc/php/conf.d/wordpress.ini
+        network_mode: container:redis
+    - name: Check if is listening
+      ansible.builtin.wait_for:
+        port: 9000
+        delay: 5
+        host: "127.0.0.1"
+        timeout: 120
 
 - name: Nginx
   block:
-      - name: Create config folder
-        ansible.builtin.file:
-            path: /root/ansible-config/nginx
-            state: directory
-            mode: "755"
-      - name: Configure Nginx
-        ansible.builtin.template:
-            src: nginx.fpm.conf.j2
-            dest: /root/ansible-config/nginx/nginx.conf
-            mode: "644"
-      - name: Create certs folder
-        ansible.builtin.file:
-            path: /root/certs
-            state: directory
-            mode: "755"
-      - name: Create certs
-        ansible.builtin.template:
-            src: fullchain.pem.j2
-            dest: /root/certs/fullchain.pem
-            mode: "644"
-      - name: Create private key
-        ansible.builtin.template:
-            src: privkey.pem.j2
-            dest: /root/certs/privkey.pem
-            mode: "644"
-      - name: Start Nginx
-        community.docker.docker_container:
-            name: nginx
-            image: nginx:latest
-            restart_policy: always
-            detach: true
-            published_ports:
-                - "[::]:443:8443"
-                - "443:443"
-            volumes:
-                - /root/ansible-config/nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf:ro
-                - /root/certs:/etc/ssl:ro
-            volumes_from:
-                - wordpress
-            networks:
-                - name: "{{ network_name }}"
-      - name: Check if is listening
-        ansible.builtin.wait_for:
-            port: 443
-            delay: 5
-            host: "127.0.0.1"
-            timeout: 120
+    - name: Create config folder
+      ansible.builtin.file:
+        path: /root/ansible-config/nginx
+        state: directory
+        mode: "755"
+    - name: Configure Nginx
+      ansible.builtin.template:
+        src: nginx.fpm.conf.j2
+        dest: /root/ansible-config/nginx/nginx.conf
+        mode: "644"
+    - name: Create certs folder
+      ansible.builtin.file:
+        path: /root/certs
+        state: directory
+        mode: "755"
+    - name: Create certs
+      ansible.builtin.template:
+        src: fullchain.pem.j2
+        dest: /root/certs/fullchain.pem
+        mode: "644"
+    - name: Create private key
+      ansible.builtin.template:
+        src: privkey.pem.j2
+        dest: /root/certs/privkey.pem
+        mode: "644"
+    - name: Start Nginx
+      community.docker.docker_container:
+        name: nginx
+        image: nginx:latest
+        restart_policy: always
+        detach: true
+        published_ports:
+          - "[::]:443:8443"
+          - "443:443"
+        volumes:
+          - /root/ansible-config/nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf:ro
+          - /root/certs:/etc/ssl:ro
+        volumes_from:
+          - wordpress
+        networks:
+          - name: "{{ network_name }}"
+    - name: Check if is listening
+      ansible.builtin.wait_for:
+        port: 443
+        delay: 5
+        host: "127.0.0.1"
+        timeout: 120
 
 - name: Delete tmp folder
   ansible.builtin.file:
-      path: /root/tmp
-      state: absent
+    path: /root/tmp
+    state: absent

@@ -1,11 +1,7 @@
 # code: language=ansible
 - name: Show OS
   ansible.builtin.debug:
-      msg: "Running on OS: {{ ansible_distribution }}"
-
-- name: If OS is Ubuntu
-  ansible.builtin.include_tasks: setup-ubuntu.yml
-  when: ansible_distribution == "Ubuntu"
+    msg: "Running on OS: {{ ansible_distribution }}"
 
 - name: If OS is Debian
   ansible.builtin.include_tasks: setup-debian.yml

@@ -1,0 +1,26 @@
+# code: language=ansible
+- name: Login Docker Hub Container Registry
+  community.docker.docker_login:
+    username: "{{ docker_user }}"
+    password: "{{ docker_token }}"
+    reauthorize: true
+
+- name: Create Dockerfile folder
+  ansible.builtin.file:
+    path: /root/ansible-config/wp-redis
+    state: directory
+    mode: "755"
+
+- name: Configure Dockerfile
+  ansible.builtin.template:
+    src: Dockerfile.j2
+    dest: /root/ansible-config/wp-redis/Dockerfile
+    mode: "644"
+
+- name: Build wordpress with redis
+  community.docker.docker_image:
+    name: maochindada/wp-redis:fpm
+    source: build
+    build:
+      path: /root/ansible-config/wp-redis
+    push: true

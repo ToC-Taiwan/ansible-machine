@@ -64,6 +64,8 @@
       community.docker.docker_plugin:
         plugin_name: loki
         state: disable
+      register: loki_disabled
+      ignore_errors: true
     - name: Remove loki
       community.docker.docker_plugin:
         plugin_name: grafana/loki-docker-driver:latest
@@ -88,32 +90,37 @@
         name: docker
         state: restarted
 
-- name: Create macvlan
+- name: Create bridge network
   community.docker.docker_network:
     name: "{{ network_name }}"
-    state: present
-    driver: macvlan
-    driver_options:
-      parent: "{{ network_parent }}"
+    force: true
+    enable_ipv6: true
     ipam_config:
-      - gateway: "10.0.0.1"
-        subnet: "10.0.0.0/24"
-        iprange: "10.0.0.0/24"
+      - subnet: "172.99.10.0/24"
+      - subnet: "fdd0:31ae:44cd:adb2::/64"
 
-- name: Start node exporter
-  community.docker.docker_container:
-    # https://hub.docker.com/r/bitnami/node-exporter/tags
-    name: node-exporter
-    image: bitnami/node-exporter:1.6.1
-    restart_policy: always
-    detach: true
-    pid_mode: host
-    volumes:
-      - /:/host:ro,rslave
-    command: --path.rootfs=/host
-    networks:
-      - name: "{{ network_name }}"
-        ipv4_address: "{{ ip_trader_node_exporter }}"
+- name: Node exporter
+  block:
+    - name: Start node exporter
+      community.docker.docker_container:
+        # https://hub.docker.com/r/bitnami/node-exporter/tags
+        name: node-exporter
+        image: bitnami/node-exporter:1.6.1
+        restart_policy: always
+        detach: true
+        published_ports:
+          - "9100:9100"
+        pid_mode: host
+        volumes:
+          - /:/host:ro,rslave
+        command: --path.rootfs=/host
+        networks:
+          - name: "{{ network_name }}"
+    - name: Check if is listening
+      ansible.builtin.wait_for:
+        port: 9100
+        delay: 5
+        timeout: 120
 
 - name: Nginx
   block:
@@ -132,6 +139,9 @@
         # https://hub.docker.com/_/nginx/tags
         name: nginx
         image: nginx:1.25.2
+        published_ports:
+          - "80:80"
+          - "443:443"
         restart_policy: always
         detach: true
         volumes:
@@ -140,7 +150,11 @@
           - /root/certbot_data/conf:/etc/nginx/ssl/:ro
         networks:
           - name: "{{ network_name }}"
-            ipv4_address: "{{ ip_trader_nginx }}"
+    - name: Check if nginx is listening
+      ansible.builtin.wait_for:
+        port: 443
+        delay: 5
+        timeout: 120
 
 - name: Rabbitmq
   block:
@@ -151,17 +165,19 @@
         image: rabbitmq:3.12.4-management
         restart_policy: always
         detach: true
+        published_ports:
+          - "5672:5672"
+          - "15672:15672"
+          - "15692:15692"
         env:
           RABBITMQ_DEFAULT_USER: "{{ rabbitmq_user }}"
           RABBITMQ_DEFAULT_PASS: "{{ rabbitmq_password }}"
         networks:
           - name: "{{ network_name }}"
-            ipv4_address: "{{ ip_trader_rabbitmq }}"
     - name: Check if is listening
       ansible.builtin.wait_for:
         port: 15672
         delay: 5
-        host: "{{ ip_trader_rabbitmq }}"
         timeout: 120
 
 - name: ToC Sinopac Python
@@ -182,6 +198,9 @@
         image: "{{ image_owner }}/toc-sinopac-python:latest"
         restart_policy: always
         detach: true
+        published_ports:
+          - "6666:6666"
+          - "56666:56666"
         volumes:
           - /root/toc-sinopac-python-logs:/toc-sinopac-python/logs
           - /root/toc-sinopac-python-env/.env:/toc-sinopac-python/.env
@@ -189,7 +208,11 @@
           TZ: "Asia/Taipei"
         networks:
           - name: "{{ network_name }}"
-            ipv4_address: "{{ ip_trader_toc_sinopac_python }}"
+    - name: Check if is listening
+      ansible.builtin.wait_for:
+        port: 56666
+        delay: 5
+        timeout: 120
 
 - name: ToC Fugle Python
   block:
@@ -209,6 +232,9 @@
         image: "{{ image_owner }}/toc-fugle-python:latest"
         restart_policy: always
         detach: true
+        published_ports:
+          - "8888:8888"
+          - "58888:58888"
         volumes:
           - /root/toc-fugle-python-logs:/toc-fugle-python/logs
           - /root/toc-fugle-python-env/.env:/toc-fugle-python/.env
@@ -216,7 +242,11 @@
           TZ: "Asia/Taipei"
         networks:
           - name: "{{ network_name }}"
-            ipv4_address: "{{ ip_trader_toc_fugle_python }}"
+    - name: Check if is listening
+      ansible.builtin.wait_for:
+        port: 58888
+        delay: 5
+        timeout: 120
 
 - name: ToC Machine Trading
   block:
@@ -247,6 +277,8 @@
         image: "{{ image_owner }}/toc-machine-trading:latest"
         restart_policy: always
         detach: true
+        published_ports:
+          - "26670:26670"
         volumes:
           - /root/toc-machine-trading-logs:/toc-machine-trading/logs
           - /root/toc-machine-trading-env/.env:/toc-machine-trading/.env
@@ -255,4 +287,8 @@
           TZ: "Asia/Taipei"
         networks:
           - name: "{{ network_name }}"
-            ipv4_address: "{{ ip_trader_toc_machine_trading }}"
+    - name: Check if is listening
+      ansible.builtin.wait_for:
+        port: 26670
+        delay: 5
+        timeout: 120

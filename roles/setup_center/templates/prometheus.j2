@@ -5,20 +5,20 @@ global:
 scrape_configs:
     - job_name: "trader-exporter"
       static_configs:
-          - targets: ["{{ ip_trader_node_exporter }}:9100"]
+          - targets: ["{{ ip_trader }}:9100"]
 
     - job_name: "toc-rabbitmq"
       static_configs:
-          - targets: ["{{ ip_trader_rabbitmq }}:15692"]
+          - targets: ["{{ ip_trader }}:15692"]
 
     - job_name: "toc-sinopac-python"
       static_configs:
-          - targets: ["{{ ip_trader_toc_sinopac_python }}:6666"]
+          - targets: ["{{ ip_trader }}:6666"]
 
     - job_name: "toc-machine-trading"
       static_configs:
-          - targets: ["{{ ip_trader_toc_machine_trading }}:26670"]
+          - targets: ["{{ ip_trader }}:26670"]
 
     - job_name: "toc-fugle-python"
       static_configs:
-          - targets: ["{{ ip_trader_toc_fugle_python }}:8888"]
+          - targets: ["{{ ip_trader }}:8888"]

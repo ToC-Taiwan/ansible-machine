@@ -58,17 +58,14 @@
     reauthorize: true
   when: use_registry == "docker"
 
-- name: Create macvlan
+- name: Create bridge network
   community.docker.docker_network:
     name: "{{ network_name }}"
-    state: present
-    driver: macvlan
-    driver_options:
-      parent: "{{ network_parent }}"
+    force: true
+    enable_ipv6: true
     ipam_config:
-      - gateway: "10.0.0.1"
-        subnet: "10.0.0.0/24"
-        iprange: "10.0.0.0/24"
+      - subnet: "172.99.10.0/24"
+      - subnet: "fdd0:31ae:44cd:adb2::/64"
 
 - name: Loki block
   block:
@@ -91,17 +88,17 @@
         image: grafana/loki:2.9.1
         restart_policy: always
         detach: true
+        published_ports:
+          - "3100:3100"
         volumes:
           - /root/loki-config/loki.yaml:/etc/loki/local-config.yaml:ro
         networks:
           - name: "{{ network_name }}"
-            ipv4_address: "{{ ip_center_loki }}"
 
     - name: Check if loki is listening
       ansible.builtin.wait_for:
         port: 3100
         delay: 5
-        host: "{{ ip_center_loki }}"
         timeout: 120
 
 - name: Prometheus block
@@ -124,18 +121,18 @@
         name: prometheus
         image: prom/prometheus:v2.47.2
         restart_policy: always
+        published_ports:
+          - "9090:9090"
         detach: true
         volumes:
           - /root/prometheus-config/prometheus.yml:/etc/prometheus/prometheus.yml:ro
         networks:
           - name: "{{ network_name }}"
-            ipv4_address: "{{ ip_center_prometheus }}"
 
     - name: Check if prometheus is listening
       ansible.builtin.wait_for:
         port: 9090
         delay: 5
-        host: "{{ ip_center_prometheus }}"
         timeout: 120
 
 - name: Grafana block
@@ -146,12 +143,13 @@
         name: grafana
         image: grafana/grafana:10.1.5
         restart_policy: always
+        published_ports:
+          - "3000:3000"
         detach: true
         env:
           TZ: "Asia/Taipei"
         networks:
           - name: "{{ network_name }}"
-            ipv4_address: "{{ ip_center_grafana }}"
 
     - name: Install grafana clock
       community.docker.docker_container_exec:
@@ -167,32 +165,31 @@
       ansible.builtin.wait_for:
         port: 3000
         delay: 5
-        host: "{{ ip_center_grafana }}"
         timeout: 120
 
     - name: Install prometheus datasource
       community.grafana.grafana_datasource:
         name: Prometheus
-        grafana_url: http://{{ ip_center_grafana }}:3000
+        grafana_url: http://127.0.0.1:3000
         grafana_user: admin
         grafana_password: admin
         ds_type: prometheus
-        ds_url: http://{{ ip_center_prometheus }}:9090
+        ds_url: http://prometheus:9090
         tls_skip_verify: true
 
     - name: Install loki datasource
       community.grafana.grafana_datasource:
         name: Loki
-        grafana_url: http://{{ ip_center_grafana }}:3000
+        grafana_url: http://127.0.0.1:3000
         grafana_user: admin
         grafana_password: admin
         ds_type: loki
-        ds_url: http://{{ ip_center_loki }}:3100
+        ds_url: http://loki:3100
         tls_skip_verify: true
 
     - name: Get datasources
       ansible.builtin.uri:
-        url: http://{{ ip_center_grafana }}:3000/api/datasources
+        url: http://127.0.0.1:3000/api/datasources
         headers:
           Authorization: Basic YWRtaW46YWRtaW4=
         method: GET
@@ -230,7 +227,7 @@
 
     - name: Import grafana dashboard
       ansible.builtin.uri:
-        url: http://{{ ip_center_grafana }}:3000/api/dashboards/db
+        url: http://127.0.0.1:3000/api/dashboards/db
         headers:
           Authorization: Basic YWRtaW46YWRtaW4=
         method: POST
@@ -258,6 +255,8 @@
         name: postgres
         image: postgres:16.0
         restart_policy: always
+        published_ports:
+          - "5432:5432"
         detach: true
         env:
           POSTGRES_DB: "{{ default_db }}"
@@ -268,4 +267,3 @@
           - /data/database/postgres:/var/lib/postgresql/data
         networks:
           - name: "{{ network_name }}"
-            ipv4_address: "{{ ip_center_postgres }}"

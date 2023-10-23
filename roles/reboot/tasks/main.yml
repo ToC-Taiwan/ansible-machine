@@ -6,7 +6,7 @@
 
 - name: Show uptime
   ansible.builtin.debug:
-      msg: "Uptime: {{ uptime.stdout }}"
+    msg: "Uptime: {{ uptime.stdout }}"
 
 - name: Reboot the machine with all defaults
   ansible.builtin.reboot:

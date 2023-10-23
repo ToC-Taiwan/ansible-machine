@@ -90,8 +90,5 @@ curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
 python3 get-pip.py --break-system-packages
 rm get-pip.py
 python3 -m pip -V
-```
-
-```sh
 python3 -m pip install ansible jmespath --break-system-packages
 ```

@@ -6,97 +6,96 @@
 
 - name: Show uptime
   ansible.builtin.debug:
-      msg: "Uptime: {{ uptime.stdout }}"
+    msg: "Uptime: {{ uptime.stdout }}"
 
 - name: Install APT
   ansible.builtin.apt:
-      name: aptitude
-      state: present
-      update_cache: true
+    name: aptitude
+    state: present
+    update_cache: true
 
 - name: APT Upgrade
   ansible.builtin.apt:
-      upgrade: full
+    upgrade: full
 
 - name: Install NTP
   ansible.builtin.apt:
-      name: systemd-timesyncd
-      update_cache: true
+    name: systemd-timesyncd
+    update_cache: true
 
 - name: Configured NTP
   ansible.builtin.template:
-      src: timesyncd.conf.j2
-      dest: /etc/systemd/timesyncd.conf
-      mode: "600"
+    src: timesyncd.conf.j2
+    dest: /etc/systemd/timesyncd.conf
+    mode: "600"
   notify:
-      - Restart ntp
+    - Restart ntp
 
 - name: Running and enabled systemd-timesyncd
   ansible.builtin.systemd:
-      name: systemd-timesyncd
-      state: started
-      enabled: true
+    name: systemd-timesyncd
+    state: started
+    enabled: true
 
 - name: Install Docker
   block:
-      - name: Install requirement
-        ansible.builtin.apt:
-            update_cache: true
-            state: present
-            pkg:
-                - ca-certificates
-                - curl
-                - gnupg
-                - lsb-release
+    - name: Install requirement
+      ansible.builtin.apt:
+        update_cache: true
+        state: present
+        pkg:
+          - ca-certificates
+          - curl
+          - gnupg
+          - lsb-release
 
-      - name: Download Docker GPG apt Key
-        ansible.builtin.get_url:
-            url: https://download.docker.com/linux/debian/gpg
-            dest: ~/key
-            mode: "600"
+    - name: Download Docker GPG apt Key
+      ansible.builtin.get_url:
+        url: https://download.docker.com/linux/debian/gpg
+        dest: ~/key
+        mode: "600"
 
-      - name: Create key folder
-        ansible.builtin.file:
-            path: /etc/apt/keyrings
-            state: directory
-            mode: "755"
+    - name: Create key folder
+      ansible.builtin.file:
+        path: /etc/apt/keyrings
+        state: directory
+        mode: "755"
 
-      - name: Dearmor key
-        ansible.builtin.shell: gpg --dearmor --batch --yes -o /etc/apt/keyrings/docker.gpg ~/key && rm ~/key
-        register: my_output
-        changed_when: my_output.rc != 0
+    - name: Dearmor key
+      ansible.builtin.shell: gpg --dearmor --batch --yes -o /etc/apt/keyrings/docker.gpg ~/key && rm ~/key
+      register: my_output
+      changed_when: my_output.rc != 0
 
-      - name: Add Repository
-        ansible.builtin.apt_repository:
-            repo: deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable
-            state: present
+    - name: Add Repository
+      ansible.builtin.apt_repository:
+        repo: deb [arch=amd64 signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable
+        state: present
 
-      - name: Update apt and install docker-ce
-        ansible.builtin.apt:
-            name: docker-ce
-            state: present
-            update_cache: true
+    - name: Update apt and install docker-ce
+      ansible.builtin.apt:
+        name: docker-ce
+        state: present
+        update_cache: true
 
-      - name: Create docker service.d directory
-        ansible.builtin.file:
-            path: /etc/systemd/system/docker.service.d
-            state: directory
-            mode: "755"
+    - name: Create docker service.d directory
+      ansible.builtin.file:
+        path: /etc/systemd/system/docker.service.d
+        state: directory
+        mode: "755"
 
-      - name: Configure Docker
-        ansible.builtin.template:
-            src: docker.j2
-            dest: /etc/systemd/system/docker.service.d/override.conf
-            mode: "644"
+    - name: Configure Docker
+      ansible.builtin.template:
+        src: docker.j2
+        dest: /etc/systemd/system/docker.service.d/override.conf
+        mode: "644"
 
-      - name: Configure Docker Daemon
-        ansible.builtin.template:
-            src: daemon.json.j2
-            dest: /etc/docker/daemon.json
-            mode: "644"
-        when: inventory_hostname not in ['blog']
+    - name: Configure Docker Daemon
+      ansible.builtin.template:
+        src: daemon.json.j2
+        dest: /etc/docker/daemon.json
+        mode: "644"
 
-      - name: Reload docker
-        ansible.builtin.systemd:
-            name: docker
-            state: restarted
+    - name: Reload docker
+      ansible.builtin.systemd:
+        name: docker
+        state: restarted

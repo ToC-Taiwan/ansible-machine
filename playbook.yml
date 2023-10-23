@@ -18,6 +18,7 @@
   hosts: trader
   roles:
     - remove_all_container
+    - basic
     - setup_trader
 
 - name: RESET TRADER
@@ -33,6 +34,7 @@
   hosts: center
   roles:
     - remove_all_container
+    - basic
     - setup_center
 
 - name: RESET CENTER
@@ -47,6 +49,7 @@
   vars_files: group_vars/vars.yml
   hosts: blog
   roles:
+    - build_wordpress
     - remove_all_container
     - basic
     - setup_blog

@@ -4,23 +4,10 @@ network_parent:
 rabbitmq_user:
 rabbitmq_password:
 
-ip_hb_homebridge:
-
-ip_blog_nginx:
-ip_blog_mariadb:
-ip_blog_wordpress:
-
-ip_center_postgres:
-ip_center_grafana:
-ip_center_loki:
-ip_center_prometheus:
-
-ip_trader_nginx:
-ip_trader_node_exporter:
-ip_trader_rabbitmq:
-ip_trader_toc_sinopac_python:
-ip_trader_toc_machine_trading:
-ip_trader_toc_fugle_python:
+ip_hb:
+ip_blog:
+ip_center:
+ip_trader:
 
 default_db:
 db_user:
@@ -48,54 +35,54 @@ cloudflare_auth:
 cloudflare_zone:
 
 mt_config:
-    simulation:
-    manual_trade:
+  simulation:
+  manual_trade:
 
-    trade_stock:
-        allow_trade:
-        subscribe:
-        odd:
+  trade_stock:
+    allow_trade:
+    subscribe:
+    odd:
 
-        # unit: second
-        hold_time_from_open:
-        trade_in_wait_time:
-        trade_out_wait_time:
-        cancel_wait_time:
+    # unit: second
+    hold_time_from_open:
+    trade_in_wait_time:
+    trade_out_wait_time:
+    cancel_wait_time:
 
-        # unit: minute
-        total_open_time:
-        trade_in_end_time:
+    # unit: minute
+    total_open_time:
+    trade_in_end_time:
 
-    trade_future:
-        allow_trade:
-        subscribe:
-        quantity:
+  trade_future:
+    allow_trade:
+    subscribe:
+    quantity:
 
-        # unit: dollar
-        target_balance_high:
-        target_balance_low:
+    # unit: dollar
+    target_balance_high:
+    target_balance_low:
 
-        # unit: times
-        trade_out_wait_times:
+    # unit: times
+    trade_out_wait_times:
 
-        # unit: seccond
-        buy_sell_wait_time:
-        tick_interval:
+    # unit: seccond
+    buy_sell_wait_time:
+    tick_interval:
 
-        # duration: minute
-        trade_time_range:
-            first_part_duration:
-            second_part_duration:
-        max_hold_time:
+    # duration: minute
+    trade_time_range:
+      first_part_duration:
+      second_part_duration:
+    max_hold_time:
 
-        # unit: volume/second
-        rate_limit:
+    # unit: volume/second
+    rate_limit:
 
-        # unit: %
-        rate_change_ratio:
-        out_in_ratio:
-        in_out_ratio:
+    # unit: %
+    rate_change_ratio:
+    out_in_ratio:
+    in_out_ratio:
 
-    slack_token:
-    slack_channel_id:
-    slack_log_level:
+  slack_token:
+  slack_channel_id:
+  slack_log_level:

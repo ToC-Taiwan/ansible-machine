@@ -1,6 +1,8 @@
+access_log off;
+
 server {
-    listen 80 default_server;
-    listen [::]:80 default_server;
+    listen 80;
+    listen [::]:80;
     server_name trader.tocraw.com;
 
     location /.well-known/acme-challenge/ {
@@ -18,14 +20,14 @@ map $http_upgrade $connection_upgrade {
 }
 
 server {
-    listen 443 ssl http2;
-    listen [::]:443 ssl http2;
+    listen 443 ssl;
+    listen [::]:443 ssl;
     server_name trader.tocraw.com;
 
     client_max_body_size 30m;
 
     location ~ /tmt {
-        proxy_pass http://{{ ip_trader_toc_machine_trading }}:26670;
+        proxy_pass http://toc-machine-trading:26670;
         proxy_http_version 1.1;
         proxy_cache_bypass $http_upgrade;
         proxy_set_header Upgrade $http_upgrade;
@@ -43,7 +45,7 @@ server {
     ssl_certificate /etc/nginx/ssl/live/trader.tocraw.com/fullchain.pem;
     ssl_certificate_key /etc/nginx/ssl/live/trader.tocraw.com/privkey.pem;
     ssl_session_timeout 1d;
-    ssl_session_cache shared:MozSSL:10m; # about 40000 sessions
+    ssl_session_cache shared:MozSSL:10m;
     ssl_session_tickets off;
 
     ssl_dhparam /etc/nginx/ssl/live/trader.tocraw.com/dhparam;
