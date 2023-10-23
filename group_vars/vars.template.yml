@@ -4,10 +4,10 @@ network_parent:
 rabbitmq_user:
 rabbitmq_password:
 
-ip_hb:
-ip_blog:
 ip_center:
 ip_trader:
+ip_blog:
+ip_hb:
 
 default_db:
 db_user:
