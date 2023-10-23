@@ -129,7 +129,7 @@
       community.docker.docker_container:
         # https://hub.docker.com/_/rabbitmq/tags
         name: toc-rabbitmq
-        image: rabbitmq:3.12.4-management
+        image: rabbitmq:3.12.7-management
         restart_policy: always
         detach: true
         published_ports:

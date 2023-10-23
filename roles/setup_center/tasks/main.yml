@@ -75,7 +75,7 @@
         mode: "644"
     - name: Start loki
       community.docker.docker_container:
-        # https://hub.docker.com/r/grafana/loki/tags
+        # https://grafana.com/docs/loki/latest/release-notes/
         name: loki
         image: grafana/loki:2.9.1
         restart_policy: always
@@ -127,7 +127,7 @@
   block:
     - name: Start grafana
       community.docker.docker_container:
-        # https://hub.docker.com/r/grafana/grafana/tags
+        # https://github.com/grafana/grafana/blob/main/CHANGELOG.md
         name: grafana
         image: grafana/grafana:10.1.5
         restart_policy: always
