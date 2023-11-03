@@ -61,11 +61,3 @@ all:
     vars:
         ansible_user: root
 ```
-
-## Reset python environment
-
-```sh
-pip3 freeze > requirements.txt
-pip3 uninstall -y -r requirements.txt
-rm -rf requirements.txt
-```
