@@ -108,7 +108,7 @@
       community.docker.docker_container:
         # https://hub.docker.com/r/prom/prometheus/tags
         name: prometheus
-        image: prom/prometheus:v2.47.2
+        image: prom/prometheus:v2.48.1
         restart_policy: always
         published_ports:
           - "9090:9090"
@@ -129,7 +129,7 @@
       community.docker.docker_container:
         # https://github.com/grafana/grafana/blob/main/CHANGELOG.md
         name: grafana
-        image: grafana/grafana:10.2.0
+        image: grafana/grafana:10.2.2
         restart_policy: always
         published_ports:
           - "3000:3000"
@@ -227,7 +227,7 @@
       community.docker.docker_container:
         # https://hub.docker.com/_/postgres/tags
         name: postgres
-        image: postgres:16.0
+        image: postgres:16.1
         restart_policy: always
         published_ports:
           - "5432:5432"

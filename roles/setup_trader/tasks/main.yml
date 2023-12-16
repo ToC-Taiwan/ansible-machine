@@ -106,7 +106,7 @@
       community.docker.docker_container:
         # https://hub.docker.com/r/bitnami/node-exporter/tags
         name: node-exporter
-        image: bitnami/node-exporter:1.6.1
+        image: bitnami/node-exporter:1.7.0
         restart_policy: always
         detach: true
         published_ports:
@@ -129,7 +129,7 @@
       community.docker.docker_container:
         # https://hub.docker.com/_/rabbitmq/tags
         name: toc-rabbitmq
-        image: rabbitmq:3.12.8-management
+        image: rabbitmq:3.12.10-management
         restart_policy: always
         detach: true
         published_ports:
