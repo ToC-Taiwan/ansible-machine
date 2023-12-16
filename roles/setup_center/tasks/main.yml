@@ -129,7 +129,7 @@
       community.docker.docker_container:
         # https://github.com/grafana/grafana/blob/main/CHANGELOG.md
         name: grafana
-        image: grafana/grafana:10.1.5
+        image: grafana/grafana:10.2.0
         restart_policy: always
         published_ports:
           - "3000:3000"

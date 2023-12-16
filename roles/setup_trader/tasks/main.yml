@@ -129,7 +129,7 @@
       community.docker.docker_container:
         # https://hub.docker.com/_/rabbitmq/tags
         name: toc-rabbitmq
-        image: rabbitmq:3.12.7-management
+        image: rabbitmq:3.12.8-management
         restart_policy: always
         detach: true
         published_ports:
@@ -276,7 +276,7 @@
       community.docker.docker_container:
         # https://hub.docker.com/_/nginx/tags
         name: nginx
-        image: nginx:1.25.2
+        image: nginx:latest
         published_ports:
           - "80:80"
           - "443:443"

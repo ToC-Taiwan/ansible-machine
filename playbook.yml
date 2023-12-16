@@ -14,7 +14,9 @@
 
 - name: SETUP TRADER
   tags: setup_trader
-  vars_files: group_vars/vars.yml
+  vars_files:
+    - group_vars/vars.yml
+    - group_vars/trader.yml
   hosts: trader
   roles:
     - remove_all_container

@@ -1,0 +1,48 @@
+MachineTradingConfig:
+  Simulation:
+  ManualTrade:
+
+  TradeStock:
+    AllowTrade:
+    Subscribe:
+    Odd:
+
+    # unit: second
+    HoldTimeFromOpen:
+    TradeInWaitTime:
+    TradeOutWaitTime:
+    CancelWaitTime:
+
+    # unit: minute
+    TotalOpenTime:
+    TradeInEndTime:
+
+  TradeFuture:
+    AllowTrade:
+    Subscribe:
+    Quantity:
+
+    # unit: dollar
+    TargetBalanceHigh:
+    TargetBalanceLow:
+
+    # unit: times
+    TradeOutWaitTimes:
+
+    # unit: seccond
+    BuySellWaitTime:
+    TickInterval:
+
+    # duration: minute
+    TradeTimeRange:
+      FirstPartDuration:
+      SecondPartDuration:
+    MaxHoldTime:
+
+    # unit: volume/second
+    RateLimit:
+
+    # unit: %
+    RateChangeRatio:
+    OutInRatio:
+    InOutRatio:

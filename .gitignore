@@ -3,3 +3,4 @@ vars.yml
 hosts.yml
 .vscode
 .DS_Store
+trader.yml
