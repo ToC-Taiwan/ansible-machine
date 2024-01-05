@@ -31,6 +31,7 @@ docker stop nginx
 docker stop certbot
 docker system prune --volumes -f
 
+docker network create certer
 echo "server {
     listen 80;
     listen [::]:80;
@@ -43,6 +44,7 @@ echo "server {
 
 docker run -d --rm \
     --name nginx \
+    --network certer \
     -p 80:80 \
     -v $(pwd)/nginx_default.conf:/etc/nginx/conf.d/nginx_default.conf:ro \
     -v $cert_path/www:/var/www/certbot/:ro \
@@ -51,6 +53,7 @@ docker run -d --rm \
 
 docker run -it --rm \
     --name certbot \
+    --network certer \
     -v $cert_path/www:/var/www/certbot/:rw \
     -v $cert_path/conf:/etc/letsencrypt/:rw \
     certbot/certbot:latest certonly \

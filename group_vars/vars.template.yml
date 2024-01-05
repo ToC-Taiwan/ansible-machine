@@ -37,3 +37,10 @@ cloudflare_zone:
 slack_token:
 slack_channel_id:
 slack_log_level:
+
+smtp_host:
+smtp_port:
+smtp_user:
+smtp_password:
+
+grafana_url:
