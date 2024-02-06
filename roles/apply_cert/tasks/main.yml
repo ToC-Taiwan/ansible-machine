@@ -1,0 +1,134 @@
+# code: language=ansible
+- name: Create bridge network
+  community.docker.docker_network:
+    name: "{{ network_name }}"
+    force: true
+    enable_ipv6: true
+    ipam_config:
+      - subnet: "172.99.10.0/24"
+      - subnet: "fdd0:31ae:44cd:adb2::/64"
+
+- name: Folders
+  block:
+    - name: Remove existing data folder
+      ansible.builtin.file:
+        path: /root/ansible-data/nginx
+        state: absent
+        mode: "755"
+    - name: Remove existing data folder
+      ansible.builtin.file:
+        path: /root/ansible-data/certbot
+        state: absent
+        mode: "755"
+    - name: Create nginx
+      ansible.builtin.file:
+        path: /root/ansible-data/nginx
+        state: directory
+        mode: "755"
+    - name: Create certbot www folder
+      ansible.builtin.file:
+        path: /root/ansible-data/certbot/www
+        state: directory
+        mode: "755"
+    - name: Create certbot conf folder
+      ansible.builtin.file:
+        path: /root/ansible-data/certbot/conf
+        state: directory
+        mode: "755"
+
+- name: Nginx
+  block:
+    - name: Configure Nginx of trader
+      ansible.builtin.template:
+        src: nginx.trader.conf.j2
+        dest: /root/ansible-data/nginx/nginx.conf
+        mode: "644"
+      when: inventory_hostname == "trader"
+    - name: Configure Nginx of mail
+      ansible.builtin.template:
+        src: nginx.mail.conf.j2
+        dest: /root/ansible-data/nginx/nginx.conf
+        mode: "644"
+      when: inventory_hostname == "mail"
+    - name: Start Nginx
+      community.docker.docker_container:
+        name: nginx
+        image: nginx:latest
+        published_ports:
+          - "80:80"
+        restart_policy: always
+        detach: true
+        volumes:
+          - /root/ansible-data/nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf:ro
+          - /root/ansible-data/certbot/www:/var/www/certbot/:ro
+        networks:
+          - name: "{{ network_name }}"
+    - name: Check if is listening
+      ansible.builtin.wait_for:
+        port: 80
+        delay: 5
+        timeout: 120
+
+- name: Certbot on trader
+  when: inventory_hostname == "trader"
+  community.docker.docker_container:
+    name: certbot
+    image: certbot/certbot:latest
+    detach: false
+    volumes:
+      - /root/ansible-data/nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf:ro
+      - /root/ansible-data/certbot/www:/var/www/certbot/:rw
+      - /root/ansible-data/certbot/conf:/etc/letsencrypt/:rw
+    networks:
+      - name: "{{ network_name }}"
+    command:
+      - "certonly"
+      - "-v"
+      - "-n"
+      - "--agree-tos"
+      - "--webroot"
+      - "--webroot-path"
+      - "/var/www/certbot/"
+      - "-m"
+      - "maochindada@gmail.com"
+      - "-d"
+      - "tocraw.com"
+
+- name: Certbot on mail
+  when: inventory_hostname == "mail"
+  community.docker.docker_container:
+    name: certbot
+    image: certbot/certbot:latest
+    detach: false
+    volumes:
+      - /root/ansible-data/nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf:ro
+      - /root/ansible-data/certbot/www:/var/www/certbot/:rw
+      - /root/ansible-data/certbot/conf:/etc/letsencrypt/:rw
+    networks:
+      - name: "{{ network_name }}"
+    command:
+      - "certonly"
+      - "-v"
+      - "-n"
+      - "--agree-tos"
+      - "--webroot"
+      - "--webroot-path"
+      - "/var/www/certbot/"
+      - "-m"
+      - "maochindada@gmail.com"
+      - "-d"
+      - "mail.tocraw.com"
+
+- name: Write dhparam
+  when: inventory_hostname == "trader"
+  ansible.builtin.get_url:
+    url: https://ssl-config.mozilla.org/ffdhe2048.txt
+    dest: /root/ansible-data/certbot/conf/live/tocraw.com/dhparam
+    mode: '644'
+
+- name: Write dhparam
+  when: inventory_hostname == "mail"
+  ansible.builtin.get_url:
+    url: https://ssl-config.mozilla.org/ffdhe2048.txt
+    dest: /root/ansible-data/certbot/conf/live/mail.tocraw.com/dhparam
+    mode: '644'

@@ -1,0 +1,76 @@
+# code: language=ansible
+- name: Create bridge network
+  community.docker.docker_network:
+    name: "{{ network_name }}"
+    force: true
+    enable_ipv6: true
+    ipam_config:
+      - subnet: "172.99.10.0/24"
+      - subnet: "fdd0:31ae:44cd:adb2::/64"
+
+- name: Folders
+  block:
+    - name: Remove current
+      ansible.builtin.file:
+        path: /root/ansible-data/dms
+        state: absent
+    - name: Create mail-data
+      ansible.builtin.file:
+        path: /root/ansible-data/dms/mail-data
+        state: directory
+        mode: "755"
+    - name: Create mail-state
+      ansible.builtin.file:
+        path: /root/ansible-data/dms/mail-state
+        state: directory
+        mode: "755"
+    - name: Create mail-logs
+      ansible.builtin.file:
+        path: /root/ansible-data/dms/mail-logs
+        state: directory
+        mode: "755"
+    - name: Create config
+      ansible.builtin.file:
+        path: /root/ansible-data/dms/config
+        state: directory
+        mode: "755"
+
+- name: DMS Env
+  block:
+    - name: Create env folder
+      ansible.builtin.file:
+        path: /root/ansible-data/dms/env
+        state: directory
+        mode: "755"
+    - name: Configure DMS env
+      ansible.builtin.template:
+        src: mailserver.env.j2
+        dest: /root/ansible-data/dms/env/mailserver.env
+        mode: "644"
+
+- name: Start
+  ansible.builtin.include_role:
+    name: setup_mail
+
+- name: Add email accounts
+  community.docker.docker_container_exec:
+    container: mailserver
+    command: setup email add "{{ item }}" "{{ system_admin_password }}"
+  loop:
+    - root@tocraw.com
+    - no-reply@tocraw.com
+
+- name: Setup dkim
+  community.docker.docker_container_exec:
+    container: mailserver
+    command: setup config dkim
+
+- name: Cat dkim
+  ansible.builtin.command:
+    cmd: cat /root/ansible-data/dms/config/opendkim/keys/tocraw.com/mail.txt
+  register: dkim
+  changed_when: dkim.rc != 0
+
+- name: Print dkim
+  ansible.builtin.debug:
+    var: dkim.stdout_lines

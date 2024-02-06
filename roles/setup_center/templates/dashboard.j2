@@ -392,18 +392,6 @@
                         "legendFormat": "{{ '{{' }} job {{ '}}' }}",
                         "range": true,
                         "refId": "B"
-                    },
-                    {
-                        "datasource": {
-                            "type": "prometheus",
-                            "uid": "{{ prometheus_id }}"
-                        },
-                        "editorMode": "code",
-                        "expr": "rate(process_cpu_seconds_total{job=\"toc-fugle-python\"}[$__rate_interval])",
-                        "hide": false,
-                        "legendFormat": "{{ '{{' }} job {{ '}}' }}",
-                        "range": true,
-                        "refId": "C"
                     }
                 ],
                 "title": "Process CPU Usage",
@@ -438,7 +426,7 @@
                             "uid": "{{ loki_id }}"
                         },
                         "editorMode": "code",
-                        "expr": "{container_name=~\"toc-machine-trading|toc-sinopac-python|toc-fugle-python\"}",
+                        "expr": "{container_name=~\"toc-machine-trading|toc-sinopac-python\"}",
                         "queryType": "range",
                         "refId": "A"
                     }
@@ -546,18 +534,6 @@
                         "legendFormat": "{{ '{{' }} job {{ '}}' }}",
                         "range": true,
                         "refId": "B"
-                    },
-                    {
-                        "datasource": {
-                            "type": "prometheus",
-                            "uid": "{{ prometheus_id }}"
-                        },
-                        "editorMode": "code",
-                        "expr": "process_resident_memory_bytes{job=\"toc-fugle-python\"}/1024/1024",
-                        "hide": false,
-                        "legendFormat": "{{ '{{' }} job {{ '}}' }}",
-                        "range": true,
-                        "refId": "D"
                     }
                 ],
                 "title": "Process Memory Usage",

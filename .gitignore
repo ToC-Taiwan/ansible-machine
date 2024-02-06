@@ -4,3 +4,4 @@ hosts.yml
 .vscode
 .DS_Store
 trader.yml
+gcloud.yml

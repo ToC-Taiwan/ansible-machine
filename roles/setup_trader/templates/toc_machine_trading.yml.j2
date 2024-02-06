@@ -3,7 +3,6 @@ ManualTrade: {{ MachineTradingConfig.ManualTrade }}
 
 TradeStock:
     AllowTrade: {{ MachineTradingConfig.TradeStock.AllowTrade }}
-    Subscribe: {{ MachineTradingConfig.TradeStock.Subscribe }}
     Odd: {{ MachineTradingConfig.TradeStock.Odd }}
 
     # unit: second
@@ -18,7 +17,6 @@ TradeStock:
 
 TradeFuture:
     AllowTrade: {{ MachineTradingConfig.TradeFuture.AllowTrade }}
-    Subscribe: {{ MachineTradingConfig.TradeFuture.Subscribe }}
     Quantity: {{ MachineTradingConfig.TradeFuture.Quantity }}
 
     # unit: dollar
@@ -48,30 +46,14 @@ TradeFuture:
 
 History:
     # unit: day
-    HistoryClosePeriod: 65
-    HistoryTickPeriod: 12
-    HistoryKbarPeriod: 65
+    HistoryClosePeriod: 60
+    HistoryTickPeriod: 10
+    HistoryKbarPeriod: 60
 
 Quota:
     StockTradeQuota: 1000000
     StockFeeDiscount: 0.28
     FutureTradeFee: 15
-
-TargetStock:
-    RealTimeRank: 20
-    BlackCategory:
-        - 17
-    BlackStock:
-        - 2317
-        - 1314
-        - 3481
-        - 2412
-        - 2002
-        - 1102
-    LimitVolume: 1000
-    PriceLimit:
-        - Low: 10
-          High: 35
 
 AnalyzeStock:
     # unit: minute

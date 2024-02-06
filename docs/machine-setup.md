@@ -9,6 +9,12 @@ su -
 ```
 
 ```sh
+apt update && \
+apt upgrade -y && \
+apt autoremove -y
+```
+
+```sh
 echo '#!/bin/bash
 apt update
 apt upgrade -y
@@ -46,6 +52,9 @@ elif [ $HOSTNAME = "trader" ]; then
     gateway_ip="10.0.0.1"
 elif [ $HOSTNAME = "blog" ]; then
     host_ip="10.0.0.97"
+    gateway_ip="10.0.0.1"
+elif [ $HOSTNAME = "mail" ]; then
+    host_ip="10.0.0.96"
     gateway_ip="10.0.0.1"
 elif [ $HOSTNAME = "hb" ]; then
     host_ip="172.20.20.99"

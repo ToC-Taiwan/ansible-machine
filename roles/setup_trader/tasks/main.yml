@@ -129,7 +129,7 @@
       community.docker.docker_container:
         # https://hub.docker.com/_/rabbitmq/tags
         name: toc-rabbitmq
-        image: rabbitmq:3.12.10-management
+        image: rabbitmq:3.12.12-management
         restart_policy: always
         detach: true
         published_ports:
@@ -151,13 +151,13 @@
   block:
     - name: Create env folder
       ansible.builtin.file:
-        path: /root/toc-sinopac-python-env
+        path: /root/ansible-data/toc-sinopac-python-env
         state: directory
         mode: "755"
     - name: Configure ToC Sinopac Python
       ansible.builtin.template:
         src: toc_sinopac_python.env.j2
-        dest: /root/toc-sinopac-python-env/.env
+        dest: /root/ansible-data/toc-sinopac-python-env/.env
         mode: "644"
     - name: Start ToC Sinopac Python
       community.docker.docker_container:
@@ -169,8 +169,8 @@
           - "6666:6666"
           - "56666:56666"
         volumes:
-          - /root/toc-sinopac-python-logs:/toc-sinopac-python/logs
-          - /root/toc-sinopac-python-env/.env:/toc-sinopac-python/.env
+          - /root/ansible-data/toc-sinopac-python-logs:/toc-sinopac-python/logs
+          - /root/ansible-data/toc-sinopac-python-env/.env:/toc-sinopac-python/.env
         env:
           TZ: "Asia/Taipei"
         networks:
@@ -181,62 +181,34 @@
         delay: 5
         timeout: 120
 
-- name: ToC Fugle Python
-  block:
-    - name: Create env folder
-      ansible.builtin.file:
-        path: /root/toc-fugle-python-env
-        state: directory
-        mode: "755"
-    - name: Configure ToC Fugle Python
-      ansible.builtin.template:
-        src: toc_fugle_python.env.j2
-        dest: /root/toc-fugle-python-env/.env
-        mode: "644"
-    - name: Start ToC Fugle Python
-      community.docker.docker_container:
-        name: toc-fugle-python
-        image: "{{ image_owner }}/toc-fugle-python:latest"
-        restart_policy: always
-        detach: true
-        published_ports:
-          - "8888:8888"
-          - "58888:58888"
-        volumes:
-          - /root/toc-fugle-python-logs:/toc-fugle-python/logs
-          - /root/toc-fugle-python-env/.env:/toc-fugle-python/.env
-        env:
-          TZ: "Asia/Taipei"
-        networks:
-          - name: "{{ network_name }}"
-    - name: Check if is listening
-      ansible.builtin.wait_for:
-        port: 58888
-        delay: 5
-        timeout: 120
-
 - name: ToC Machine Trading
   block:
     - name: Create env folder
       ansible.builtin.file:
-        path: /root/toc-machine-trading-env
+        path: /root/ansible-data/toc-machine-trading-env
         state: directory
         mode: "755"
     - name: Create config folder
       ansible.builtin.file:
-        path: /root/toc-machine-trading-configs
+        path: /root/ansible-data/toc-machine-trading-configs
         state: directory
         mode: "755"
     - name: Configure ToC Machine Trading Env
       ansible.builtin.template:
         src: toc_machine_trading.env.j2
-        dest: /root/toc-machine-trading-env/.env
+        dest: /root/ansible-data/toc-machine-trading-env/.env
         mode: "644"
     - name: Configure ToC Machine Trading Config
       ansible.builtin.template:
         src: toc_machine_trading.yml.j2
-        dest: /root/toc-machine-trading-configs/config.yml
+        dest: /root/ansible-data/toc-machine-trading-configs/config.yml
         mode: "644"
+    - name: Configure ToC Machine Trading Service Account
+      ansible.builtin.template:
+        src: service_account.json.j2
+        dest: /root/ansible-data/toc-machine-trading-configs/service_account.json
+        mode: "644"
+
 
     - name: Start ToC Machine Trading
       community.docker.docker_container:
@@ -247,9 +219,10 @@
         published_ports:
           - "26670:26670"
         volumes:
-          - /root/toc-machine-trading-logs:/toc-machine-trading/logs
-          - /root/toc-machine-trading-env/.env:/toc-machine-trading/.env
-          - /root/toc-machine-trading-configs/config.yml:/toc-machine-trading/configs/config.yml
+          - /root/ansible-data/toc-machine-trading-logs:/toc-machine-trading/logs
+          - /root/ansible-data/toc-machine-trading-env/.env:/toc-machine-trading/.env
+          - /root/ansible-data/toc-machine-trading-configs/config.yml:/toc-machine-trading/configs/config.yml
+          - /root/ansible-data/toc-machine-trading-configs/service_account.json:/toc-machine-trading/configs/service_account.json
         env:
           TZ: "Asia/Taipei"
         networks:
@@ -264,13 +237,18 @@
   block:
     - name: Create config folder
       ansible.builtin.file:
-        path: /root/ansible-config/nginx
+        path: /root/ansible-data/nginx
         state: directory
         mode: "755"
     - name: Configure Nginx
       ansible.builtin.template:
         src: nginx.conf.j2
-        dest: /root/ansible-config/nginx/nginx.conf
+        dest: /root/ansible-data/nginx/nginx.conf
+        mode: "644"
+    - name: Add AASA
+      ansible.builtin.template:
+        src: assetlinks.json.j2
+        dest: /root/ansible-data/nginx/assetlinks.json
         mode: "644"
     - name: Start Nginx
       community.docker.docker_container:
@@ -283,9 +261,10 @@
         restart_policy: always
         detach: true
         volumes:
-          - /root/ansible-config/nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf:ro
-          - /root/certbot_data/www:/var/www/certbot/:ro
-          - /root/certbot_data/conf:/etc/nginx/ssl/:ro
+          - /root/ansible-data/nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf:ro
+          - /root/ansible-data/nginx:/var/www/aasa/:ro
+          - /root/ansible-data/certbot/www:/var/www/certbot/:ro
+          - /root/ansible-data/certbot/conf:/etc/nginx/ssl/:ro
         networks:
           - name: "{{ network_name }}"
     - name: Check if is listening

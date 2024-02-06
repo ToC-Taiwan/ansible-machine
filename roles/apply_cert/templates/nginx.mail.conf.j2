@@ -1,0 +1,10 @@
+access_log off;
+
+server {
+    listen 80;
+    server_name mail.tocraw.com;
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+}

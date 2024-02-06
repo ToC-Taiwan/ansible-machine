@@ -11,9 +11,11 @@ apt install -y curl
 ```sh
 domain_name=""
 if [ $HOSTNAME = "trader" ]; then
-    domain_name="trader.tocraw.com"
+    domain_name="tocraw.com"
 elif [ $HOSTNAME = "blog" ]; then
     domain_name="tocandraw.com"
+elif [ $HOSTNAME = "mail" ]; then
+    domain_name="mail.tocraw.com"
 fi
 if [ -z $domain_name ]; then
     echo "domain_name is empty"

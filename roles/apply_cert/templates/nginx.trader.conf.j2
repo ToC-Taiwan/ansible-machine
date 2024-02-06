@@ -1,0 +1,26 @@
+access_log off;
+
+server {
+    listen 80;
+    server_name mail.tocraw.com;
+
+    location / {
+        proxy_pass          http://10.0.0.96;
+        proxy_set_header    Host              $http_host;
+        proxy_set_header    X-Real-IP         $remote_addr;
+        proxy_set_header    X-Forwarded-Host  $host;
+        proxy_set_header    X-Forwarded-Port  $server_port;
+        proxy_set_header    X-Forwarded-Proto $scheme;
+        proxy_read_timeout  3600s;
+        proxy_redirect      off;
+    }
+}
+
+server {
+    listen 80;
+    server_name tocraw.com;
+
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+}

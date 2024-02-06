@@ -18,12 +18,6 @@ sinopac_ca_password:
 sinopac_api_key:
 sinopac_api_key_secret:
 
-fugle_api_key:
-fugle_api_key_secret:
-fugle_account:
-fugle_login_password:
-fugle_ca_password:
-
 github_user:
 github_token:
 
@@ -44,3 +38,5 @@ smtp_user:
 smtp_password:
 
 grafana_url:
+
+system_admin_password:

@@ -1,73 +1,117 @@
 # code: language=ansible
-- name: BASIC
+- name: Basic
   tags: basic
-  vars_files: group_vars/vars.yml
-  hosts: all
+  hosts: vms
   roles:
     - basic
 
-- name: REBOOT
+- name: Reboot
   tags: reboot
-  hosts: all
+  hosts: vms
   roles:
     - reboot
 
-- name: SETUP TRADER
-  tags: setup_trader
+- name: Remove_all_container
+  tags: reset_all
+  hosts: vms
+  roles:
+    - remove_all_container
+
+- name: Apply_cert
+  tags: apply_cert
+  hosts:
+    - trader
+    - mail
   vars_files:
     - group_vars/vars.yml
-    - group_vars/trader.yml
-  hosts: trader
   roles:
-    - remove_all_container
-    - basic
-    - setup_trader
-
-- name: RESET TRADER
-  tags: reset_trader
-  vars_files: group_vars/vars.yml
-  hosts: trader
-  roles:
+    - apply_cert
     - remove_all_container
 
-- name: CENTER SETUP
-  tags: setup_center
-  vars_files: group_vars/vars.yml
-  hosts: center
+- name: Init_mail
+  tags: init_mail
+  hosts: mail
+  vars_files:
+    - group_vars/vars.yml
   roles:
     - remove_all_container
-    - basic
-    - setup_center
+    - init_mail
 
-- name: RESET CENTER
-  tags: reset_center
-  vars_files: group_vars/vars.yml
-  hosts: center
+- name: Setup_mail
+  tags: setup_mail
+  hosts: mail
+  vars_files:
+    - group_vars/vars.yml
+  roles:
+    - remove_all_container
+    - setup_mail
+
+- name: Reset_mail
+  tags: reset_mail
+  hosts: mail
   roles:
     - remove_all_container
 
-- name: BLOG SETUP
+- name: Setup_blog
   tags: setup_blog
-  vars_files: group_vars/vars.yml
   hosts: blog
+  vars_files:
+    - group_vars/vars.yml
   roles:
+    - remove_all_container
     - build_wordpress
     - remove_all_container
-    - basic
     - setup_blog
 
-- name: RESET BLOG
+- name: Reset_blog
   tags: reset_blog
-  vars_files: group_vars/vars.yml
   hosts: blog
   roles:
     - remove_all_container
 
-- name: HB SETUP
+- name: Setup_center
+  tags: setup_center
+  hosts: center
+  vars_files:
+    - group_vars/vars.yml
+  roles:
+    - remove_all_container
+    - setup_center
+
+- name: Reset_center
+  tags: reset_center
+  hosts: center
+  roles:
+    - remove_all_container
+
+- name: Setup_hb
   tags: setup_hb
-  vars_files: group_vars/vars.yml
+  hosts: hb
+  vars_files:
+    - group_vars/vars.yml
+  roles:
+    - remove_all_container
+    - setup_hb
+
+- name: Reset_hb
+  tags: reset_hb
   hosts: hb
   roles:
     - remove_all_container
-    - basic
-    - setup_hb
+
+- name: Setup_trader
+  tags: setup_trader
+  hosts: trader
+  vars_files:
+    - group_vars/vars.yml
+    - group_vars/trader.yml
+    - group_vars/gcloud.yml
+  roles:
+    - remove_all_container
+    - setup_trader
+
+- name: Reset_trader
+  tags: reset_trader
+  hosts: trader
+  roles:
+    - remove_all_container
