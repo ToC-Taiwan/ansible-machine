@@ -23,6 +23,10 @@ upstream grafana {
     server {{ ip_center }}:3000;
 }
 
+upstream tmt {
+    server toc-machine-trading:26670;
+}
+
 server {
     listen 443 ssl;
     listen [::]:443 ssl;
@@ -31,8 +35,7 @@ server {
     client_max_body_size 30m;
 
     location ~ /tmt {
-        proxy_pass http://toc-machine-trading:26670;
-        proxy_http_version 1.1;
+        proxy_pass http://tmt;
         proxy_cache_bypass $http_upgrade;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection $connection_upgrade;
@@ -42,13 +45,16 @@ server {
         proxy_set_header X-Forwarded-Proto $scheme;
         proxy_set_header X-Forwarded-Host $host;
         proxy_set_header X-Forwarded-Port $server_port;
-        proxy_read_timeout 3600s;
         proxy_redirect off;
     }
 
     location /.well-known/apple-app-site-association {
         alias /var/www/aasa/;
         index assetlinks.json;
+    }
+
+    location /.well-known {
+        alias /var/www/android/;
     }
 
     location /api/live/ {
