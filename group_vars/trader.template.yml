@@ -4,7 +4,6 @@ MachineTradingConfig:
 
   TradeStock:
     AllowTrade:
-    Odd:
 
     # unit: second
     HoldTimeFromOpen:
