@@ -53,7 +53,7 @@
     - name: Start Nginx
       community.docker.docker_container:
         name: nginx
-        image: nginx:latest
+        image: nginx:stable
         published_ports:
           - "80:80"
         restart_policy: always

@@ -51,7 +51,7 @@ docker run -d --rm \
     -v $(pwd)/nginx_default.conf:/etc/nginx/conf.d/nginx_default.conf:ro \
     -v $cert_path/www:/var/www/certbot/:ro \
     -v $cert_path/conf:/etc/nginx/ssl/:ro \
-    nginx:latest
+    nginx:stable
 
 docker run -it --rm \
     --name certbot \

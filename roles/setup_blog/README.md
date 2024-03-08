@@ -96,5 +96,5 @@ docker run --rm -d \
     --network=$net_name \
     --volumes-from wordpress \
     -v $(pwd)/nginx.conf:/etc/nginx/conf.d/nginx.conf:ro \
-    nginx:latest
+    nginx:stable
 ```
