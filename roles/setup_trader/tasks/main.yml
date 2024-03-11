@@ -166,7 +166,6 @@
         restart_policy: always
         detach: true
         published_ports:
-          - "26670:26670"
           - "6666:6666"
           - "56666:56666"
         volumes:
@@ -209,8 +208,6 @@
         src: service_account.json.j2
         dest: /root/ansible-data/toc-machine-trading-configs/service_account.json
         mode: "644"
-
-
     - name: Start ToC Machine Trading
       community.docker.docker_container:
         name: toc-machine-trading
@@ -224,7 +221,10 @@
           - /root/ansible-data/toc-machine-trading-configs/service_account.json:/toc-machine-trading/configs/service_account.json
         env:
           TZ: "Asia/Taipei"
-        network_mode: container:toc-sinopac-python
+        networks:
+          - name: "{{ network_name }}"
+        published_ports:
+          - "26670:26670"
     - name: Check if is listening
       ansible.builtin.wait_for:
         port: 26670
@@ -252,7 +252,6 @@
         path: /root/ansible-data/nginx/android
         state: directory
         mode: "755"
-
     - name: Configure Nginx
       ansible.builtin.template:
         src: nginx.conf.j2
@@ -268,7 +267,6 @@
         src: assetlinks.json.android.j2
         dest: /root/ansible-data/nginx/android/assetlinks.json
         mode: "644"
-
     - name: Start Nginx
       community.docker.docker_container:
         # https://hub.docker.com/_/nginx/tags
