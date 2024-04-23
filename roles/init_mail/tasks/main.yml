@@ -58,6 +58,7 @@
     command: setup email add "{{ item }}" "{{ system_admin_password }}"
   loop:
     - root@tocraw.com
+    - maochindada@tocraw.com
     - no-reply@tocraw.com
 
 - name: Setup dkim

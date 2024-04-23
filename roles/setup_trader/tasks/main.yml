@@ -252,11 +252,6 @@
         path: /root/ansible-data/nginx/android
         state: directory
         mode: "755"
-    - name: Configure Nginx
-      ansible.builtin.template:
-        src: nginx.conf.j2
-        dest: /root/ansible-data/nginx/nginx.conf
-        mode: "644"
     - name: Add AASA
       ansible.builtin.template:
         src: assetlinks.json.j2
@@ -267,22 +262,23 @@
         src: assetlinks.json.android.j2
         dest: /root/ansible-data/nginx/android/assetlinks.json
         mode: "644"
-    - name: Start Nginx
+    - name: Start Web
       community.docker.docker_container:
-        # https://hub.docker.com/_/nginx/tags
-        name: nginx
-        image: nginx:stable
+        name: toc-machine-trading-vue
+        image: "{{ image_owner }}/toc-machine-trading-vue:latest"
         published_ports:
           - "80:80"
           - "443:443"
         restart_policy: always
         detach: true
         volumes:
-          - /root/ansible-data/nginx/nginx.conf:/etc/nginx/conf.d/nginx.conf:ro
           - /root/ansible-data/nginx/aasa:/var/www/aasa/:ro
           - /root/ansible-data/nginx/android:/var/www/android/:ro
           - /root/ansible-data/certbot/www:/var/www/certbot/:ro
           - /root/ansible-data/certbot/conf:/etc/nginx/ssl/:ro
+        env:
+          TZ: "Asia/Taipei"
+          TMT_HOST: "toc-machine-trading"
         networks:
           - name: "{{ network_name }}"
     - name: Check if is listening

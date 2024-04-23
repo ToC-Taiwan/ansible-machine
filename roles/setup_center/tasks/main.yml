@@ -135,7 +135,6 @@
           - "3000:3000"
         detach: true
         env:
-          GF_SERVER_ROOT_URL: "{{ grafana_url }}"
           TZ: "Asia/Taipei"
         networks:
           - name: "{{ network_name }}"
