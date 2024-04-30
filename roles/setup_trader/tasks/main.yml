@@ -264,8 +264,8 @@
         mode: "644"
     - name: Start Web
       community.docker.docker_container:
-        name: toc-machine-trading-vue
-        image: "{{ image_owner }}/toc-machine-trading-vue:latest"
+        name: toc-fronted-web
+        image: "{{ image_owner }}/toc-fronted-web:latest"
         published_ports:
           - "80:80"
           - "443:443"
