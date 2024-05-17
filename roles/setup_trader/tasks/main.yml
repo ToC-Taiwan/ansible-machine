@@ -242,26 +242,6 @@
         path: /root/ansible-data/nginx
         state: directory
         mode: "755"
-    - name: Create AASA folder
-      ansible.builtin.file:
-        path: /root/ansible-data/nginx/aasa
-        state: directory
-        mode: "755"
-    - name: Create Android Universal Link folder
-      ansible.builtin.file:
-        path: /root/ansible-data/nginx/android
-        state: directory
-        mode: "755"
-    - name: Add AASA
-      ansible.builtin.template:
-        src: assetlinks.json.j2
-        dest: /root/ansible-data/nginx/aasa/assetlinks.json
-        mode: "644"
-    - name: Add Android Universal Link
-      ansible.builtin.template:
-        src: assetlinks.json.android.j2
-        dest: /root/ansible-data/nginx/android/assetlinks.json
-        mode: "644"
     - name: Start Web
       community.docker.docker_container:
         name: toc-fronted-web
@@ -272,8 +252,6 @@
         restart_policy: always
         detach: true
         volumes:
-          - /root/ansible-data/nginx/aasa:/var/www/aasa/:ro
-          - /root/ansible-data/nginx/android:/var/www/android/:ro
           - /root/ansible-data/certbot/www:/var/www/certbot/:ro
           - /root/ansible-data/certbot/conf:/etc/nginx/ssl/:ro
         env:

@@ -25,6 +25,7 @@
   vars_files:
     - group_vars/vars.yml
   roles:
+    - remove_all_container
     - apply_cert
     - remove_all_container
 

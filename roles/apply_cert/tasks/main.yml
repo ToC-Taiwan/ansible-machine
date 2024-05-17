@@ -1,4 +1,15 @@
 # code: language=ansible
+- name: Reset docker
+  block:
+    - name: Remove Docker Daemon
+      ansible.builtin.file:
+        path: /etc/docker/daemon.json
+        state: absent
+    - name: Reload docker
+      ansible.builtin.systemd:
+        name: docker
+        state: restarted
+
 - name: Create bridge network
   community.docker.docker_network:
     name: "{{ network_name }}"
@@ -124,11 +135,11 @@
   ansible.builtin.get_url:
     url: https://ssl-config.mozilla.org/ffdhe2048.txt
     dest: /root/ansible-data/certbot/conf/live/tocraw.com/dhparam
-    mode: '644'
+    mode: "644"
 
 - name: Write dhparam
   when: inventory_hostname == "mail"
   ansible.builtin.get_url:
     url: https://ssl-config.mozilla.org/ffdhe2048.txt
     dest: /root/ansible-data/certbot/conf/live/mail.tocraw.com/dhparam
-    mode: '644'
+    mode: "644"
