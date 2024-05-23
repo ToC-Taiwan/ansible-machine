@@ -11,7 +11,7 @@
 - name: Start DMS
   community.docker.docker_container:
     name: mailserver
-    image: ghcr.io/docker-mailserver/docker-mailserver:latest
+    image: mailserver/docker-mailserver:latest
     published_ports:
       - "25:25"
       - "143:143"

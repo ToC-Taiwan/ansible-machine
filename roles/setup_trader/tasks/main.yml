@@ -106,7 +106,7 @@
       community.docker.docker_container:
         # https://hub.docker.com/r/bitnami/node-exporter/tags
         name: node-exporter
-        image: bitnami/node-exporter:1.7.0
+        image: bitnami/node-exporter:1.8.1
         restart_policy: always
         detach: true
         published_ports:
