@@ -388,7 +388,7 @@
             },
             "editorMode": "code",
             "exemplar": false,
-            "expr": "rate(process_cpu_seconds_total{job=\"toc-machine-trading\"}[$__rate_interval])",
+            "expr": "avg(rate(process_cpu_seconds_total{job=\"toc-machine-trading\"}[5m])*1000)",
             "interval": "",
             "legendFormat": "{{ '{{' }} job {{ '}}' }}",
             "range": true,
@@ -400,7 +400,7 @@
               "uid": "{{ prometheus_id }}"
             },
             "editorMode": "code",
-            "expr": "rate(process_cpu_seconds_total{job=\"toc-sinopac-python\"}[$__rate_interval])",
+            "expr": "avg(rate(process_cpu_seconds_total{job=\"toc-sinopac-python\"}[5m])*1000)",
             "hide": false,
             "legendFormat": "{{ '{{' }} job {{ '}}' }}",
             "range": true,
